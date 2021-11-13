@@ -29,14 +29,6 @@ public class HelloVerticle extends AbstractVerticle {
 				
 				String name = (String) event.body();
 				
-//				if("vuongbv".equals(name)) {
-//					try {
-//						Thread.sleep(5000);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-//				}
-				
 				event.reply(String.format("Hello: %s !", name));
 			};
 		});
