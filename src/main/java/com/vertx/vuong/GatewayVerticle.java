@@ -8,13 +8,9 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
 public class GatewayVerticle extends AbstractVerticle {
-
+	
 	@Override
 	public void start() {
-		
-		vertx.deployVerticle(new HelloVerticle());
-		
-		vertx.deployVerticle(new HelloVerticle());
 		
 		System.out.println(String.format("Start Vericle GatewayVerticle: %s", Thread.currentThread().getName()));
 		

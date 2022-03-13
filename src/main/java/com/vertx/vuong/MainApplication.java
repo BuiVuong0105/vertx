@@ -1,5 +1,6 @@
 package com.vertx.vuong;
 
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 
 public class MainApplication {
@@ -10,7 +11,8 @@ public class MainApplication {
 		
 		Vertx vertx = Vertx.vertx();
 		
-		vertx.deployVerticle(new GatewayVerticle());
+		vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setInstances(1));
 		
+		vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setInstances(2));
 	}
 }
