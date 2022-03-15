@@ -1,4 +1,4 @@
-package com.vertx.vuong;
+package com.vertx.vuong.verticle;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;

@@ -1,5 +1,8 @@
 package com.vertx.vuong;
 
+import com.vertx.vuong.verticle.ApiVerticle;
+import com.vertx.vuong.verticle.HelloVerticle;
+
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 
@@ -11,7 +14,7 @@ public class MainApplication {
 		
 		Vertx vertx = Vertx.vertx();
 		
-		vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setInstances(1));
+		vertx.deployVerticle(ApiVerticle.class.getName(), new DeploymentOptions().setInstances(1));
 		
 		vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setInstances(2));
 	}
