@@ -1,4 +1,4 @@
-package com.vertx.vuong;
+package com.vertx.vuong.verticle;
 
 import java.util.UUID;
 

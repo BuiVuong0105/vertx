@@ -1,4 +1,4 @@
-package com.vertx.vuong;
+package com.vertx.vuong.verticle;
 
 import java.util.UUID;
 
@@ -18,8 +18,6 @@ public class GatewayVerticle extends AbstractVerticle {
 	public void start() {
 		
 		System.out.println(String.format("Start Vericle GatewayVerticle, VerticleId: %s, Thread: %s", verticleId, Thread.currentThread().getName()));
-		
-		vertx.deployVerticle(new HelloVerticle());
 		
 		Router router = Router.router(vertx);
 		
