@@ -1,15 +1,19 @@
 package com.vertx.vuong;
 
+import java.util.UUID;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 
 public class HelloVerticle extends AbstractVerticle {
+	
+	private String verticleId = UUID.randomUUID().toString();
 
 	@Override
 	public void start() {
 		
-		System.out.println(String.format("Start Vericle HELLO: %s", Thread.currentThread().getName()));
+		System.out.println(String.format("Start Vericle HELLO, VerticleId: %s, Thread: %s", verticleId, Thread.currentThread().getName()));
 
 		this.vertx.eventBus().consumer("address.hello", new Handler<Message<Object>>() {
 			
@@ -29,7 +33,7 @@ public class HelloVerticle extends AbstractVerticle {
 				
 				String name = (String) event.body();
 				
-				event.reply(String.format("Hello: %s !", name));
+				event.reply(String.format("Hello: %s ; from: %s ", name, verticleId));
 			};
 		});
 	}
