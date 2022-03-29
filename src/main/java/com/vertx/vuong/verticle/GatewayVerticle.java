@@ -2,9 +2,6 @@ package com.vertx.vuong.verticle;
 
 import java.util.UUID;
 
-import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -28,21 +25,9 @@ public class GatewayVerticle extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> start) {
 		
-		System.out.println(String.format("Start Vericle GatewayVerticle, VerticleId: %s, Thread: %s", verticleId, Thread.currentThread().getName()));
-
+		System.out.println(String.format("Deploy Verticle: %s, VerticleId: %s, Thread: %s", this.getClass().getName() ,verticleId, Thread.currentThread().getName()));
+		
 		Router router = Router.router(vertx);
-		
-//		SessionStore sessionStore = ClusteredSessionStore.create(vertx); // Session trong cluster
-		
-		SessionStore sessionStore = LocalSessionStore.create(vertx); // Session trong local
-		
-		router.route().handler(SessionHandler.create(sessionStore));
-		
-		router.route().handler(CorsHandler.create("*"));
-		
-		router.route().handler(LoggerHandler.create());
-		
-		router.route().handler(CSRFHandler.create(vertx, "asdashdlasd4a45d4a2df45sdf2sdf1s53d@@@!##$#%#$%"));
 		
 		router.route().handler(context -> {
 
@@ -65,27 +50,19 @@ public class GatewayVerticle extends AbstractVerticle {
 		
 		router.route().handler(StaticHandler.create("web").setIndexPage("index.html"));
 		
+		JsonObject config = config();
 
-		ConfigStoreOptions defaultConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "config.json"));
-		
-		ConfigStoreOptions cliConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "config.json") );
-		
-		ConfigRetrieverOptions opts = new ConfigRetrieverOptions().addStore(defaultConfig).addStore(cliConfig);
-		
-		ConfigRetriever configRetriever = ConfigRetriever.create(vertx, opts);
-		
-		Handler<AsyncResult<JsonObject>> handler =  new Handler<AsyncResult<JsonObject>>() {
-			
-			@Override
-			public void handle(AsyncResult<JsonObject> asyncResult) {
-				handleConfigResult(start, router, asyncResult);
-			}
-		};
+		JsonObject httpJsonObject = config.getJsonObject("http");
 
-		configRetriever.getConfig(handler);
+		int port = httpJsonObject.getInteger("port", 8080);
+
+		vertx.createHttpServer().requestHandler(router).listen(port);
+
+		start.complete();
 		
+		System.out.println(String.format("HttpServer Start Success With Port: %s", port));
 	}
-
+	
 	public void hello(RoutingContext ctx) {
 
 		System.out.println(String.format("Request: /api/v1/hello: %s", Thread.currentThread().getName()));
@@ -119,25 +96,60 @@ public class GatewayVerticle extends AbstractVerticle {
 		});
 	}
 	
-	public void handleConfigResult(Promise<Void> start, Router router, AsyncResult<JsonObject> asyncResult) {
+	// Sequential Composition - Do A, Then B, Then C .... Handler Errors
+	// Concurrent Composition - Do A and B and C and D .... and once all/any complete - So something else ...
+	private void executeAsynchronous() {
+		
+	}
+	
+	// Run blocking code trong worker thread and execute handle result in eventloop
+	private void executeBlockingCode(Promise<Void> start) {
+		
+		for (int i = 0; i <= 3; i++) {
+			int index = i;
+			vertx.executeBlocking(new Handler<Promise<String>>() {
+				
+				@Override
+				public void handle(Promise<String> event) {
+					
+					System.out.println(String.format("Blocking Handler %s, Thread: %s", index, Thread.currentThread().getName()));
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						event.fail(e);
+					}
 
-		if (!asyncResult.succeeded()) {
-
-			start.fail("Unable to load configuration... !");
-
-			return;
+					event.complete("ok");
+				}
+				
+			}, false, new Handler<AsyncResult<String>>() {
+				
+				@Override
+				public void handle(AsyncResult<String> event) {
+					
+					if(event.succeeded()) {
+						System.out.println(String.format("Blocking Handler %s Result: %s, Thread: %s", index, event.result(), Thread.currentThread().getName()));
+					}
+					
+					else {
+						start.fail("Fail Execute Blocking");
+					}
+				}
+			});
 		}
-
-		JsonObject config = asyncResult.result();
-
-		JsonObject httpJsonObject = config.getJsonObject("http");
-
-		int port = httpJsonObject.getInteger("port", 8080);
-
-		System.out.println(String.format("PORT: %s", port));
-
-		vertx.createHttpServer().requestHandler(router).listen(port);
-
-		start.complete();
+	}
+	
+	private void configExtra(Router router) {
+		
+		SessionStore sessionStore = LocalSessionStore.create(vertx); // Session trong local || ClusteredSessionStore.create(vertx); // Session trong cluster
+		
+		router.route().handler(SessionHandler.create(sessionStore));
+		
+		router.route().handler(CorsHandler.create("*"));
+		
+		router.route().handler(LoggerHandler.create());
+		
+		router.route().handler(CSRFHandler.create(vertx, "asdashdlasd4a45d4a2df45sdf2sdf1s53d@@@!##$#%#$%"));
 	}
 }
