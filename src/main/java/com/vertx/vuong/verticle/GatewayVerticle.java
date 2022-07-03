@@ -7,6 +7,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -44,9 +45,12 @@ public class GatewayVerticle extends AbstractVerticle {
 			}
 		});
 		
+		router.get("/api/v1/chunk").handler(this::chunk1);
+		router.get("/api/v1/chunk").handler(this::chunk2);
+		router.get("/api/v1/chunk").handler(this::chunk3);
+		
 		router.get("/api/v1/hello").handler(this::hello);
-
-		router.get("/api/v1/:name").handler(this::helloIdentity);
+		router.get("/api/v1/hello/:name").handler(this::helloIdentity);
 		
 		router.route().handler(StaticHandler.create("web").setIndexPage("index.html"));
 		
@@ -61,6 +65,28 @@ public class GatewayVerticle extends AbstractVerticle {
 		start.complete();
 		
 		System.out.println(String.format("HttpServer Start Success With Port: %s", port));
+	}
+	
+	public void chunk1(RoutingContext ctx) {
+		System.out.println(String.format("Request: /api/v1/chunk1: %s", Thread.currentThread().getName()));
+		HttpServerResponse response = ctx.response();
+		response.setChunked(true);
+		response.write("chunk 1");
+		ctx.vertx().setTimer(2000, id -> ctx.next());
+	}
+	
+	public void chunk2(RoutingContext ctx) {
+		System.out.println(String.format("Request: /api/v1/chunk2: %s", Thread.currentThread().getName()));
+		HttpServerResponse response = ctx.response();
+		response.write("chunk 2");
+		ctx.vertx().setTimer(4000, id -> ctx.next());
+	}
+	
+	public void chunk3(RoutingContext ctx) {
+		System.out.println(String.format("Request: /api/v1/chunk3: %s", Thread.currentThread().getName()));
+		HttpServerResponse response = ctx.response();
+		response.write("chunk 3");
+		response.end();
 	}
 	
 	public void hello(RoutingContext ctx) {
