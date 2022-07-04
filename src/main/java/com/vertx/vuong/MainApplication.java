@@ -6,6 +6,7 @@ import com.vertx.vuong.verticle.HelloVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -18,7 +19,7 @@ import io.vertx.core.json.JsonObject;
 // Clustering dựa vào lệnh java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar -cluster -Djava.net.preferIPv4Stack=true -Dhttp.port=8090
 // Đây là khai báo cluster nếu chạy dựa trên đối tượng vertx của hệ thống tạo ra sẵn, còn nếu tự tạo vertx riêng thì phải cấu hình cluster
 // Cluster application phân tải công việc đến từng node thông qua eventbus
-public class MainApplication {
+public class MainApplication extends AbstractVerticle {
 
 	public static void main(String[] args) {
 		
@@ -29,7 +30,7 @@ public class MainApplication {
 		
 		System.out.println(String.format("Start MainApplication: %s", Thread.currentThread().getName()));
 		
-		Vertx vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(25).setBlockedThreadCheckInterval(60 * 10 * 1000));
+		Vertx vertx = Vertx.vertx(new VertxOptions().setEventLoopPoolSize(10).setWorkerPoolSize(25).setBlockedThreadCheckInterval(60 * 10 * 1000));
 		
 		doConfig(vertx).compose(jsonObject -> doDeployVerticle(vertx, jsonObject))
 		
@@ -122,7 +123,7 @@ public class MainApplication {
 		
 		Future<String> futureGw = Future.future(promise -> vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setConfig(jsonObject), promise));
 		
-		Future<String> futureHello = Future.future(promise -> vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setInstances(1).setConfig(jsonObject), promise));
+		Future<String> futureHello = Future.future(promise -> vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setInstances(2).setConfig(jsonObject), promise));
 		
 		return CompositeFuture.all(futureGw, futureHello).mapEmpty();
 	}

@@ -28,6 +28,7 @@ public class HelloVerticle extends AbstractVerticle {
 				};
 			});
 
+			
 			this.vertx.eventBus().consumer("address.hello.name", new Handler<Message<Object>>() {
 
 				public void handle(Message<Object> event) {
