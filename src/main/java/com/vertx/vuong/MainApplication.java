@@ -22,7 +22,6 @@ import io.vertx.core.json.JsonObject;
 public class MainApplication extends AbstractVerticle {
 
 	public static void main(String[] args) {
-		
 		new MainApplication().start();
 	}
 	
@@ -43,56 +42,6 @@ public class MainApplication extends AbstractVerticle {
 					
 					System.out.println(String.format("Deploy Vericle Fail: %s, Thread: %s", throwable.toString(), Thread.currentThread().getName()));
 				});
-		
-//		ConfigStoreOptions defaultConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "config.json"));
-//		
-//		ConfigStoreOptions cliConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "config.json") );
-//		
-//		ConfigRetrieverOptions opts = new ConfigRetrieverOptions().addStore(defaultConfig).addStore(cliConfig);
-//		
-//		ConfigRetriever configRetriever = ConfigRetriever.create(vertx, opts);
-//		
-//		configRetriever.getConfig(new Handler<AsyncResult<JsonObject>>() {
-//			
-//			@Override
-//			public void handle(AsyncResult<JsonObject> event) {
-//
-//				JsonObject jsonObject = event.result();
-//
-//				if (event.succeeded()) {
-//					
-//					System.out.println(String.format("Load Config Success: %s, Thread: %s", event.toString(), Thread.currentThread().getName()));
-//					
-//					System.out.println(String.format("In Progess Verticle Thread: %s", Thread.currentThread().getName()));
-//
-//					Future<String> futureGw = vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setConfig(jsonObject));
-//
-//					Future<String> futureHello = vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setInstances(2).setConfig(jsonObject));
-//
-//					CompositeFuture.all(futureGw, futureHello)
-//
-//							.onComplete(new Handler<AsyncResult<CompositeFuture>>() {
-//								
-//								@Override
-//								public void handle(AsyncResult<CompositeFuture> event) {
-//									System.out.println(String.format("Deploy Vericle Succes: %s", Thread.currentThread().getName()));
-//								};
-//							})
-//
-//							.onFailure(new Handler<Throwable>() {
-//								
-//								@Override
-//								public void handle(Throwable event) {
-//									System.out.println(String.format("Deploy Vericle Fail: %s, Thread: %s", event.toString(), Thread.currentThread().getName()));
-//								}
-//							});
-//				}
-//
-//				else {
-//					System.out.println(String.format("Load Config Fail: %s, Thread: %s", event.toString(), Thread.currentThread().getName()));
-//				}
-//			}
-//		});
 	}
 	
 	private Future<JsonObject> doConfig(Vertx vertx) {
@@ -109,7 +58,6 @@ public class MainApplication extends AbstractVerticle {
 			
 			@Override
 			public void handle(Promise<JsonObject> promise) {
-				
 				configRetriever.getConfig(promise);
 			}
 		});
@@ -123,8 +71,60 @@ public class MainApplication extends AbstractVerticle {
 		
 		Future<String> futureGw = Future.future(promise -> vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setConfig(jsonObject), promise));
 		
-		Future<String> futureHello = Future.future(promise -> vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setInstances(2).setConfig(jsonObject), promise));
+		Future<String> futureHelloEventLoop = Future.future(promise -> vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setInstances(2).setConfig(jsonObject), promise));
 		
-		return CompositeFuture.all(futureGw, futureHello).mapEmpty();
+		Future<String> futureHelloWorker = Future.future(promise -> vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setInstances(2).setConfig(jsonObject), promise));
+		
+		return CompositeFuture.all(futureGw, futureHelloEventLoop, futureHelloWorker).mapEmpty();
 	}
 }
+
+//ConfigStoreOptions defaultConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "config.json"));
+//
+//ConfigStoreOptions cliConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "config.json") );
+//
+//ConfigRetrieverOptions opts = new ConfigRetrieverOptions().addStore(defaultConfig).addStore(cliConfig);
+//
+//ConfigRetriever configRetriever = ConfigRetriever.create(vertx, opts);
+//
+//configRetriever.getConfig(new Handler<AsyncResult<JsonObject>>() {
+//	
+//	@Override
+//	public void handle(AsyncResult<JsonObject> event) {
+//
+//		JsonObject jsonObject = event.result();
+//
+//		if (event.succeeded()) {
+//			
+//			System.out.println(String.format("Load Config Success: %s, Thread: %s", event.toString(), Thread.currentThread().getName()));
+//			
+//			System.out.println(String.format("In Progess Verticle Thread: %s", Thread.currentThread().getName()));
+//
+//			Future<String> futureGw = vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setConfig(jsonObject));
+//
+//			Future<String> futureHello = vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setInstances(2).setConfig(jsonObject));
+//
+//			CompositeFuture.all(futureGw, futureHello)
+//
+//					.onComplete(new Handler<AsyncResult<CompositeFuture>>() {
+//						
+//						@Override
+//						public void handle(AsyncResult<CompositeFuture> event) {
+//							System.out.println(String.format("Deploy Vericle Succes: %s", Thread.currentThread().getName()));
+//						};
+//					})
+//
+//					.onFailure(new Handler<Throwable>() {
+//						
+//						@Override
+//						public void handle(Throwable event) {
+//							System.out.println(String.format("Deploy Vericle Fail: %s, Thread: %s", event.toString(), Thread.currentThread().getName()));
+//						}
+//					});
+//		}
+//
+//		else {
+//			System.out.println(String.format("Load Config Fail: %s, Thread: %s", event.toString(), Thread.currentThread().getName()));
+//		}
+//	}
+//});
