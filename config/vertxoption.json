@@ -1,0 +1,4 @@
+{
+	"eventLoopPoolSize": 10,
+	"workerPoolSize": 20
+}

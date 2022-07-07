@@ -33,8 +33,6 @@ public class GatewayVerticle extends AbstractVerticle {
 
 			String authToken = context.request().getHeader("auth_token");
 
-			System.out.println(String.format("GatewayVerticle, Authen Token: %s, Thread: %s", authToken, Thread.currentThread().getName()));
-
 			if ("vuongbv0105".equals(authToken)) {
 				context.next();
 			}
