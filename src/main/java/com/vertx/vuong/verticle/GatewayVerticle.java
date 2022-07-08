@@ -6,6 +6,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.WorkerExecutor;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -29,21 +30,18 @@ public class GatewayVerticle extends AbstractVerticle {
 		
 		Router router = Router.router(vertx);
 		
-		router.route().handler(context -> {
-
-			String authToken = context.request().getHeader("auth_token");
-
-			if ("vuongbv0105".equals(authToken)) {
-				context.next();
-			}
-
-			else {
-				context.response().setStatusCode(401).setStatusMessage("Access Denied...! ").end("Access Denied...! ");
-			}
-		});
-		
+//		router.route().handler(context -> {
+//			String authToken = context.request().getHeader("auth_token");
+//			if ("vuongbv0105".equals(authToken)) {
+//				context.next();
+//			}else {
+//				context.response().setStatusCode(401).setStatusMessage("Access Denied...! ").end("Access Denied...! ");
+//			}
+//		});
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor("bvv-worker");
 		router.get("/api/v1/hello").handler(this::hello);
 		router.get("/api/v1/hello/:name").handler(this::helloIdentity);
+		router.get("/api/v1/execute/:name").handler(r -> execute(r, executor));
 		
 		router.route().handler(StaticHandler.create("web").setIndexPage("index.html"));
 		
@@ -54,33 +52,11 @@ public class GatewayVerticle extends AbstractVerticle {
 		int port = httpJsonObject.getInteger("port", 8080);
 
 		vertx.createHttpServer().requestHandler(router).listen(port);
-
-		start.complete();
 		
+		start.complete();
+
 		System.out.println(String.format("HttpServer Start Success With Port: %s", port));
 	}
-	
-//	public void chunk1(RoutingContext ctx) {
-//		System.out.println(String.format("Request: /api/v1/chunk1: %s", Thread.currentThread().getName()));
-//		HttpServerResponse response = ctx.response();
-//		response.setChunked(true);
-//		response.write("chunk 1");
-//		ctx.vertx().setTimer(2000, id -> ctx.next());
-//	}
-//	
-//	public void chunk2(RoutingContext ctx) {
-//		System.out.println(String.format("Request: /api/v1/chunk2: %s", Thread.currentThread().getName()));
-//		HttpServerResponse response = ctx.response();
-//		response.write("chunk 2");
-//		ctx.vertx().setTimer(4000, id -> ctx.next());
-//	}
-//	
-//	public void chunk3(RoutingContext ctx) {
-//		System.out.println(String.format("Request: /api/v1/chunk3: %s", Thread.currentThread().getName()));
-//		HttpServerResponse response = ctx.response();
-//		response.write("chunk 3");
-//		response.end();
-//	}
 	
 	public void hello(RoutingContext ctx) {
 
@@ -98,65 +74,61 @@ public class GatewayVerticle extends AbstractVerticle {
 	}
 
 	public void helloIdentity(RoutingContext ctx) {
-
-		System.out.println(String.format("Request: /api/v1/:name: %s", Thread.currentThread().getName()));
-
+		
+		System.out.println(String.format("Request: /api/v1/hello/:name: %s", Thread.currentThread().getName()));
+		
 		String name = ctx.pathParam("name");
-
+		
 		this.vertx.eventBus().request("address.hello.name", name, new Handler<AsyncResult<Message<Object>>>() {
-
+			
 			@Override
 			public void handle(AsyncResult<Message<Object>> event) {
-
+				
 				System.out.println(String.format("Response: /api/v1/:name: %s", Thread.currentThread().getName()));
-
+				
 				ctx.request().response().end((String) event.result().body());
 			}
 		});
+	}
+	
+	public void execute(RoutingContext ctx, WorkerExecutor executor) {
+		
+		System.out.println(String.format("Request: /api/v1/execute/:name: %s", Thread.currentThread().getName()));
+		
+		executeBlockingCode(executor);
+		
+		ctx.request().response().end("ok");
+	}
+	
+	// Run blocking code trong worker thread and execute handle result in eventloop
+	private void executeBlockingCode(WorkerExecutor executor) {
+		for (int i = 0; i <= 0; i++) {
+			int index = i;
+			vertx.executeBlocking(new Handler<Promise<String>>() {
+				@Override
+				public void handle(Promise<String> event) {
+					System.out.println(String.format("Blocking Handler %s, Thread: %s", index, Thread.currentThread().getName()));
+					try {
+						Thread.sleep(500000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						event.fail(e);
+					}
+					event.complete("ok");
+				}
+			}, false, new Handler<AsyncResult<String>>() {
+				@Override
+				public void handle(AsyncResult<String> event) {
+					System.out.println(String.format("Result Handler %s, Thread: %s", index, Thread.currentThread().getName()));
+				}
+			});
+		}
 	}
 	
 	// Sequential Composition - Do A, Then B, Then C .... Handler Errors
 	// Concurrent Composition - Do A and B and C and D .... and once all/any complete - So something else ...
 	private void executeAsynchronous() {
 		
-	}
-	
-	// Run blocking code trong worker thread and execute handle result in eventloop
-	private void executeBlockingCode(Promise<Void> start) {
-		
-		for (int i = 0; i <= 3; i++) {
-			int index = i;
-			vertx.executeBlocking(new Handler<Promise<String>>() {
-				
-				@Override
-				public void handle(Promise<String> event) {
-					
-					System.out.println(String.format("Blocking Handler %s, Thread: %s", index, Thread.currentThread().getName()));
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-						event.fail(e);
-					}
-
-					event.complete("ok");
-				}
-				
-			}, false, new Handler<AsyncResult<String>>() {
-				
-				@Override
-				public void handle(AsyncResult<String> event) {
-					
-					if(event.succeeded()) {
-						System.out.println(String.format("Blocking Handler %s Result: %s, Thread: %s", index, event.result(), Thread.currentThread().getName()));
-					}
-					
-					else {
-						start.fail("Fail Execute Blocking");
-					}
-				}
-			});
-		}
 	}
 	
 	private void configExtra(Router router) {

@@ -59,7 +59,7 @@ public class MainVerticle extends AbstractVerticle {
 		
 		System.out.println(String.format("In Progess Verticle Thread: %s", Thread.currentThread().getName()));
 		
-		Future<String> futureGw = Future.future(promise -> vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setConfig(jsonObject), promise));
+		Future<String> futureGw = Future.future(promise -> vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise));
 		
 		Future<String> futureHello = Future.future(promise -> vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setInstances(1).setConfig(jsonObject), promise));
 		
