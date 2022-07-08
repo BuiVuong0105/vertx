@@ -38,10 +38,11 @@ public class GatewayVerticle extends AbstractVerticle {
 //				context.response().setStatusCode(401).setStatusMessage("Access Denied...! ").end("Access Denied...! ");
 //			}
 //		});
-		WorkerExecutor executor = vertx.createSharedWorkerExecutor("bvv-worker");
+		
+//		WorkerExecutor executor = vertx.createSharedWorkerExecutor("bvv-worker");
 		router.get("/api/v1/hello").handler(this::hello);
 		router.get("/api/v1/hello/:name").handler(this::helloIdentity);
-		router.get("/api/v1/execute/:name").handler(r -> execute(r, executor));
+		router.get("/api/v1/execute/:name").handler(r -> execute(r, null));
 		
 		router.route().handler(StaticHandler.create("web").setIndexPage("index.html"));
 		
@@ -122,6 +123,7 @@ public class GatewayVerticle extends AbstractVerticle {
 					System.out.println(String.format("Result Handler %s, Thread: %s", index, Thread.currentThread().getName()));
 				}
 			});
+			System.out.println(String.format("End Index %s, Thread: %s", index, Thread.currentThread().getName()));
 		}
 	}
 	
