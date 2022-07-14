@@ -59,9 +59,9 @@ public class MainApplication extends AbstractVerticle {
 		ConfigRetriever configRetriever = ConfigRetriever.create(vertx, opts);
 		
 		Future<JsonObject> future = Future.future(new Handler<Promise<JsonObject>>() {
-			
 			@Override
 			public void handle(Promise<JsonObject> promise) {
+				System.out.println(String.format("Future Get Config Thread: %s", Thread.currentThread().getName()));
 				configRetriever.getConfig(promise);
 			}
 		});
@@ -73,9 +73,15 @@ public class MainApplication extends AbstractVerticle {
 		
 		System.out.println(String.format("In Progess Verticle Thread: %s", Thread.currentThread().getName()));
 		
-		Future<String> futureGw = Future.future(promise -> vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setConfig(jsonObject), promise));
+		Future<String> futureGw = Future.future(promise -> {
+			System.out.println(String.format("Future GatewayVerticle Thread: %s", Thread.currentThread().getName()));
+			vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setConfig(jsonObject), promise);
+		});
 		
-		Future<String> futureHello = Future.future(promise -> vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setConfig(jsonObject), promise));
+		Future<String> futureHello = Future.future(promise -> {
+			System.out.println(String.format("Future HelloVerticle Thread: %s", Thread.currentThread().getName()));
+			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise);
+		});
 		
 		return CompositeFuture.all(futureGw, futureHello).mapEmpty();
 	}

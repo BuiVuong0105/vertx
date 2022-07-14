@@ -55,6 +55,8 @@ public class GatewayVerticle extends AbstractVerticle {
 		vertx.createHttpServer().requestHandler(router).listen(port);
 		
 		start.complete();
+		
+//		executeBlockingCode(null);
 
 		System.out.println(String.format("HttpServer Start Success With Port: %s", port));
 	}
@@ -103,7 +105,7 @@ public class GatewayVerticle extends AbstractVerticle {
 	
 	// Run blocking code trong worker thread and execute handle result in eventloop
 	private void executeBlockingCode(WorkerExecutor executor) {
-		for (int i = 0; i <= 0; i++) {
+		for (int i = 0; i <= 5; i++) {
 			int index = i;
 			vertx.executeBlocking(new Handler<Promise<String>>() {
 				@Override
