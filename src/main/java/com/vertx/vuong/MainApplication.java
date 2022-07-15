@@ -1,5 +1,6 @@
 package com.vertx.vuong;
 
+import com.vertx.vuong.verticle.DatabaseVerticle;
 import com.vertx.vuong.verticle.GatewayVerticle;
 import com.vertx.vuong.verticle.HelloVerticle;
 
@@ -15,6 +16,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.pgclient.PgPool;
 
 // Clustering dựa vào lệnh java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar -cluster -Djava.net.preferIPv4Stack=true -Dhttp.port=8090
 // Đây là khai báo cluster nếu chạy dựa trên đối tượng vertx của hệ thống tạo ra sẵn, còn nếu tự tạo vertx riêng thì phải cấu hình cluster
@@ -31,28 +33,27 @@ public class MainApplication extends AbstractVerticle {
 		
 		System.out.println(String.format("Start MainApplication: %s", Thread.currentThread().getName()));
 		
+//		final PgPool dbClient = DbUtils.buildDbClient(vertx);
+		
 		Vertx vertx = Vertx.vertx(new VertxOptions().setEventLoopPoolSize(10).setWorkerPoolSize(25).setBlockedThreadCheckInterval(5 * 10 * 1000));
 		
 		doConfig(vertx).compose(jsonObject -> doDeployVerticle(vertx, jsonObject))
 		
 				.onComplete(result -> {
-					
 					System.out.println(String.format("Deploy Vericle Succes: %s", Thread.currentThread().getName()));
 				})
 				
 				.onFailure(throwable -> {
-					
 					System.out.println(String.format("Deploy Vericle Fail: %s, Thread: %s", throwable.toString(), Thread.currentThread().getName()));
 				});
 	}
 	
 	private Future<JsonObject> doConfig(Vertx vertx) {
 		
-		ConfigStoreOptions defaultConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "./config/testconfig.json"));
-		
 //		ConfigStoreOptions evnConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "./config/testconfig.json"));
-		
 //		ConfigStoreOptions cliConfig = new ConfigStoreOptions().setType("json").setConfig(config());
+		
+		ConfigStoreOptions defaultConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "./config/testconfig.json"));
 		
 		ConfigRetrieverOptions opts = new ConfigRetrieverOptions().addStore(defaultConfig);
 		
@@ -80,10 +81,15 @@ public class MainApplication extends AbstractVerticle {
 		
 		Future<String> futureHello = Future.future(promise -> {
 			System.out.println(String.format("Future HelloVerticle Thread: %s", Thread.currentThread().getName()));
-			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise);
+			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setConfig(jsonObject), promise);
 		});
 		
-		return CompositeFuture.all(futureGw, futureHello).mapEmpty();
+		Future<String> futureDatabase = Future.future(promise -> {
+			System.out.println(String.format("Future DatabaseVerticle Thread: %s", Thread.currentThread().getName()));
+			vertx.deployVerticle(DatabaseVerticle.class.getName(), new DeploymentOptions().setWorker(true).setConfig(jsonObject), promise);
+		});
+		
+		return CompositeFuture.all(futureGw, futureHello, futureDatabase).mapEmpty();
 	}
 }
 

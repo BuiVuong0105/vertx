@@ -37,13 +37,7 @@
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-core</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-dropwizard-metrics</artifactId>
-		</dependency>
-
-
+		
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-web</artifactId>
@@ -65,6 +59,28 @@
 			<artifactId>postgresql</artifactId>
 			<version>42.2.11</version>
 		</dependency>
+		
+			<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-jdbc-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-dropwizard-metrics</artifactId>
+		</dependency>
+		
+		   <!-- https://mvnrepository.com/artifact/io.vertx/vertx-pg-client -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-pg-client</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.vertx/vertx-sql-client-templates -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-sql-client-templates</artifactId>
+        </dependency>
 
 
 	</dependencies>

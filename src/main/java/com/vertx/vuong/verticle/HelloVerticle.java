@@ -13,7 +13,7 @@ public class HelloVerticle extends AbstractVerticle {
 
 	@Override
 	public void start(Promise<Void> start) {
-
+		
 		try {
 
 			System.out.println(String.format("Deploy Verticle: %s, VerticleId: %s, Thread: %s", this.getClass().getName() ,verticleId, Thread.currentThread().getName()));

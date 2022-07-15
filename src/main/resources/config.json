@@ -1,5 +1,12 @@
 {
 	"http": {
 		"port": 8080
+	},
+	"db": {
+		"url": "jdbc:postgresql://10.5.11.51:5432/qrcode",
+		"user": "postgres",
+		"password": "123@123Aa",
+		"admin_user": "postgres",
+		"admin_pass": "123@123Aa"
 	}
 }
