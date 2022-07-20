@@ -21,16 +21,17 @@ public class DatabaseVerticle extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> start) {
 		
-		System.out.println(String.format("Deploy DatabaseVerticle: %s, VerticleId: %s, Thread: %s", this.getClass().getName() ,verticleId, Thread.currentThread().getName()));
+		System.out.println(String.format("[%s] Deploy DatabaseVerticle: %s, VerticleId: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId));
 		
 		configSqlClient()
 		
 		.onComplete(handler -> {
-			System.out.println(String.format("Connect DB Success: VerticleId: %s, Thread: %s" ,verticleId, Thread.currentThread().getName()));
+			System.out.println(String.format("[%s] Connect DB Success: VerticleId: %s", Thread.currentThread().getName() ,verticleId));
 			start.complete();
 		})
+		
 		.onFailure(handler -> {
-			System.out.println(String.format("Connect DB fail: %s, VerticleId: %s, Thread: %s", handler.getStackTrace() ,verticleId, Thread.currentThread().getName()));
+			System.out.println(String.format("[%s]Connect DB fail: %s, VerticleId: %s", Thread.currentThread().getName(), handler.getStackTrace() ,verticleId));
 			start.fail(handler.getCause());
 		});
 	}

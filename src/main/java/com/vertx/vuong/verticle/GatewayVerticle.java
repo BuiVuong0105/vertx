@@ -26,7 +26,7 @@ public class GatewayVerticle extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> start) {
 		
-		System.out.println(String.format("Deploy Verticle: %s, VerticleId: %s, Thread: %s", this.getClass().getName() ,verticleId, Thread.currentThread().getName()));
+		System.out.println(String.format("[%s] Deploy GatewayVerticle: %s, VerticleId: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId));
 		
 		Router router = Router.router(vertx);
 		
