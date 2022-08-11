@@ -37,27 +37,6 @@ public class MainApplication extends AbstractVerticle {
 		
 		Vertx vertx = Vertx.vertx(new VertxOptions().setEventLoopPoolSize(10).setWorkerPoolSize(3).setBlockedThreadCheckInterval(5 * 10 * 1000));
 		
-//		vertx.executeBlocking(new Handler<Promise<String>>() {
-//			@Override
-//			public void handle(Promise<String> event) {
-//				System.out.println(String.format("Blocking Handler %s, Thread: %s", 1, Thread.currentThread().getName()));
-//				event.complete("ok");
-//			}
-//		}, false, new Handler<AsyncResult<String>>() {
-//			@Override
-//			public void handle(AsyncResult<String> event) {
-//				System.out.println(String.format("Result Handler %s, Thread: %s", 1, Thread.currentThread().getName()));
-//			}
-//		});
-
-		
-		final Context context = ((VertxImpl)vertx).createWorkerContext();
-		context.put("data", "hello");
-		context.runOnContext((v) -> {
-		  String hello = context.get("data");
-		  System.out.println("Run worker lan 1" + Thread.currentThread().getName());
-		});
-		
 		Future<JsonObject> futureConfig = doConfig(vertx);
 		
 		futureConfig.onSuccess(jsonObject -> {
@@ -118,14 +97,14 @@ public class MainApplication extends AbstractVerticle {
 		});
 		
 		Future<String> futureHello = Future.future(promise -> {
-			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise);
+			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setConfig(jsonObject), promise);
 		});
 		
-		Future<String> futureDatabase = Future.future(promise -> {
-			vertx.deployVerticle(DatabaseVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise);
-		});
+//		Future<String> futureDatabase = Future.future(promise -> {
+//			vertx.deployVerticle(DatabaseVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise);
+//		});
 		
-		return CompositeFuture.all(futureGw, futureHello, futureDatabase).mapEmpty();
+		return CompositeFuture.all(futureGw, futureHello).mapEmpty();
 	}
 }
 

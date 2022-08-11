@@ -27,9 +27,7 @@ public class GatewayVerticle extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> start) {
 		
-		System.out.println(String.format("[%s] Deploy GatewayVerticle: %s, VerticleId: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId));
-		
-		System.out.println("GWVERTICLE" + vertx.getOrCreateContext());
+		System.out.println(String.format("[%s] Deploy GatewayVerticle: %s, VerticleId: %s, Context: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId, context));
 		
 		Router router = Router.router(vertx);
 		
@@ -92,7 +90,9 @@ public class GatewayVerticle extends AbstractVerticle {
 			@Override
 			public void handle(AsyncResult<Message<Object>> event) {
 				
-				System.out.println(String.format("Response: /api/v1/:name: %s", Thread.currentThread().getName()));
+				Context context = vertx.getOrCreateContext();
+				
+				System.out.println(String.format("Response: /api/v1/:name: %s, context: %s", Thread.currentThread().getName(), context));
 				
 				ctx.request().response().end((String) event.result().body());
 			}
