@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.WorkerExecutor;
@@ -27,6 +28,8 @@ public class GatewayVerticle extends AbstractVerticle {
 	public void start(Promise<Void> start) {
 		
 		System.out.println(String.format("Deploy Verticle: %s, VerticleId: %s, Thread: %s", this.getClass().getName() ,verticleId, Thread.currentThread().getName()));
+		
+		System.out.println("GWVERTICLE" + vertx.getOrCreateContext());
 		
 		Router router = Router.router(vertx);
 		
@@ -78,7 +81,9 @@ public class GatewayVerticle extends AbstractVerticle {
 
 	public void helloIdentity(RoutingContext ctx) {
 		
-		System.out.println(String.format("Request: /api/v1/hello/:name: %s", Thread.currentThread().getName()));
+		Context context = vertx.getOrCreateContext();
+		
+		System.out.println(String.format("Request: /api/v1/hello/:name: %s, Context: %s", Thread.currentThread().getName(),context) );
 		
 		String name = ctx.pathParam("name");
 		

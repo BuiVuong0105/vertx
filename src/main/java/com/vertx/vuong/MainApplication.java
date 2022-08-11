@@ -8,13 +8,16 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
+import io.vertx.core.Context;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
 
@@ -24,28 +27,57 @@ import io.vertx.pgclient.PgPool;
 // java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar --conf config/testconfig1.json --options config/vertxoption.json
 public class MainApplication extends AbstractVerticle {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		new MainApplication().start();
 	}
 	
 	@Override
-	public void start() {
+	public void start() throws InterruptedException {
 		
 		System.out.println(String.format("Start MainApplication: %s", Thread.currentThread().getName()));
 		
 //		final PgPool dbClient = DbUtils.buildDbClient(vertx);
 		
-		Vertx vertx = Vertx.vertx(new VertxOptions().setEventLoopPoolSize(10).setWorkerPoolSize(25).setBlockedThreadCheckInterval(5 * 10 * 1000));
+		Vertx vertx = Vertx.vertx(new VertxOptions().setEventLoopPoolSize(10).setWorkerPoolSize(3).setBlockedThreadCheckInterval(5 * 10 * 1000));
 		
-		doConfig(vertx).compose(jsonObject -> doDeployVerticle(vertx, jsonObject))
+//		vertx.executeBlocking(new Handler<Promise<String>>() {
+//			@Override
+//			public void handle(Promise<String> event) {
+//				System.out.println(String.format("Blocking Handler %s, Thread: %s", 1, Thread.currentThread().getName()));
+//				event.complete("ok");
+//			}
+//		}, false, new Handler<AsyncResult<String>>() {
+//			@Override
+//			public void handle(AsyncResult<String> event) {
+//				System.out.println(String.format("Result Handler %s, Thread: %s", 1, Thread.currentThread().getName()));
+//			}
+//		});
+
 		
-				.onComplete(result -> {
-					System.out.println(String.format("Deploy Vericle Succes: %s", Thread.currentThread().getName()));
-				})
-				
-				.onFailure(throwable -> {
-					System.out.println(String.format("Deploy Vericle Fail: %s, Thread: %s", throwable.toString(), Thread.currentThread().getName()));
-				});
+		final Context context = ((VertxImpl)vertx).createWorkerContext();
+		context.put("data", "hello");
+		context.runOnContext((v) -> {
+		  String hello = context.get("data");
+		  System.out.println("Run worker lan 1" + Thread.currentThread().getName());
+		});
+		
+		Thread.sleep(10000);
+
+		context.runOnContext((v) -> {
+			  String hello = context.get("data");
+			  System.out.println("Run worker lan 2" + Thread.currentThread().getName());
+			});
+
+		
+//		doConfig(vertx).compose(jsonObject -> doDeployVerticle(vertx, jsonObject))
+//		
+//				.onComplete(result -> {
+//					System.out.println(String.format("Deploy Vericle Succes: %s", Thread.currentThread().getName()));
+//				})
+//				
+//				.onFailure(throwable -> {
+//					System.out.println(String.format("Deploy Vericle Fail: %s, Thread: %s", throwable.toString(), Thread.currentThread().getName()));
+//				});
 	}
 	
 	private Future<JsonObject> doConfig(Vertx vertx) {
@@ -81,7 +113,7 @@ public class MainApplication extends AbstractVerticle {
 		
 		Future<String> futureHello = Future.future(promise -> {
 			System.out.println(String.format("Future HelloVerticle Thread: %s", Thread.currentThread().getName()));
-			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setConfig(jsonObject), promise);
+			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setInstances(3).setWorker(true).setConfig(jsonObject), promise);
 		});
 		
 		Future<String> futureDatabase = Future.future(promise -> {
