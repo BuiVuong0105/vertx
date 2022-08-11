@@ -19,9 +19,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
-import io.vertx.pgclient.PgPool;
 
-// Clustering dựa vào lệnh java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar -cluster -Djava.net.preferIPv4Stack=true -Dhttp.port=8090
+// Clustering dựa vào lệnh java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar --conf config/testconfig1.json -cluster -Djava.net.preferIPv4Stack=true -Dhttp.port=8090
 // Đây là khai báo cluster nếu chạy dựa trên đối tượng vertx của hệ thống tạo ra sẵn, còn nếu tự tạo vertx riêng thì phải cấu hình cluster
 // Cluster application phân tải công việc đến từng node thông qua eventbus
 // java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar --conf config/testconfig1.json --options config/vertxoption.json
@@ -34,9 +33,7 @@ public class MainApplication extends AbstractVerticle {
 	@Override
 	public void start() throws InterruptedException {
 		
-		System.out.println(String.format("Start MainApplication: %s", Thread.currentThread().getName()));
-		
-//		final PgPool dbClient = DbUtils.buildDbClient(vertx);
+		System.out.println(String.format("[%s] Start MainApplication", Thread.currentThread().getName()));
 		
 		Vertx vertx = Vertx.vertx(new VertxOptions().setEventLoopPoolSize(10).setWorkerPoolSize(3).setBlockedThreadCheckInterval(5 * 10 * 1000));
 		
@@ -61,13 +58,26 @@ public class MainApplication extends AbstractVerticle {
 		  System.out.println("Run worker lan 1" + Thread.currentThread().getName());
 		});
 		
-		Thread.sleep(10000);
-
-		context.runOnContext((v) -> {
-			  String hello = context.get("data");
-			  System.out.println("Run worker lan 2" + Thread.currentThread().getName());
+		Future<JsonObject> futureConfig = doConfig(vertx);
+		
+		futureConfig.onSuccess(jsonObject -> {
+			
+			System.out.println(String.format("[%s] Do config success", Thread.currentThread().getName()));
+			
+			Future<Void> futureVericle = doDeployVerticle(vertx, jsonObject);
+			
+			futureVericle.onSuccess(unuse -> {
+				System.out.println(String.format("[%s] Do Deploy Verticle Success", Thread.currentThread().getName()));
 			});
-
+			
+			futureVericle.onFailure(throwable -> {
+				System.out.println(String.format("[%s] Do Deploy Verticle fail: %s", Thread.currentThread().getName(), throwable.getMessage()));
+			});
+		});
+		
+		futureConfig.onFailure(throwable -> {
+			System.out.println(String.format("[%s] Do config fail: %s", Thread.currentThread().getName(), throwable.getMessage()));
+		});
 		
 //		doConfig(vertx).compose(jsonObject -> doDeployVerticle(vertx, jsonObject))
 //		
@@ -94,7 +104,6 @@ public class MainApplication extends AbstractVerticle {
 		Future<JsonObject> future = Future.future(new Handler<Promise<JsonObject>>() {
 			@Override
 			public void handle(Promise<JsonObject> promise) {
-				System.out.println(String.format("Future Get Config Thread: %s", Thread.currentThread().getName()));
 				configRetriever.getConfig(promise);
 			}
 		});
@@ -104,21 +113,16 @@ public class MainApplication extends AbstractVerticle {
 	
 	private Future<Void> doDeployVerticle(Vertx vertx, JsonObject jsonObject) {
 		
-		System.out.println(String.format("In Progess Verticle Thread: %s", Thread.currentThread().getName()));
-		
 		Future<String> futureGw = Future.future(promise -> {
-			System.out.println(String.format("Future GatewayVerticle Thread: %s", Thread.currentThread().getName()));
-			vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setConfig(jsonObject), promise);
+			vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise);
 		});
 		
 		Future<String> futureHello = Future.future(promise -> {
-			System.out.println(String.format("Future HelloVerticle Thread: %s", Thread.currentThread().getName()));
-			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setInstances(3).setWorker(true).setConfig(jsonObject), promise);
+			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise);
 		});
 		
 		Future<String> futureDatabase = Future.future(promise -> {
-			System.out.println(String.format("Future DatabaseVerticle Thread: %s", Thread.currentThread().getName()));
-			vertx.deployVerticle(DatabaseVerticle.class.getName(), new DeploymentOptions().setWorker(true).setConfig(jsonObject), promise);
+			vertx.deployVerticle(DatabaseVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise);
 		});
 		
 		return CompositeFuture.all(futureGw, futureHello, futureDatabase).mapEmpty();

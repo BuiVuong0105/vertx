@@ -16,7 +16,7 @@ public class HelloVerticle extends AbstractVerticle {
 		
 		try {
 
-			System.out.println(String.format("Deploy Verticle: %s, VerticleId: %s, Thread: %s", this.getClass().getName() ,verticleId, Thread.currentThread().getName()));
+			System.out.println(String.format("[%s] Deploy HelloVerticle: %s, VerticleId: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId));
 
 			this.vertx.eventBus().consumer("address.hello", new Handler<Message<Object>>() {
 
