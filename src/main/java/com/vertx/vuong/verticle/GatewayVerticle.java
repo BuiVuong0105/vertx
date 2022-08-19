@@ -51,7 +51,7 @@ public class GatewayVerticle extends AbstractVerticle {
 
 		JsonObject httpJsonObject = config.getJsonObject("http");
 
-		int port = httpJsonObject.getInteger("port", 8080);
+		int port = Integer.parseInt(System.getProperty("port", "8080"));
 
 		vertx.createHttpServer().requestHandler(router).listen(port);
 		

@@ -1,6 +1,6 @@
 {
 	"http": {
-		"port": 8070
+		"port": 8071
 	},
 	"db": {
 		"url": "jdbc:postgresql://10.5.11.51:5432/qrcode",
