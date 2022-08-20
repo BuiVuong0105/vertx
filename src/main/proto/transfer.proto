@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.vertx.vuong.grpc";
+
+package com.icheck.qr.read.grpc;
+
+
+service TransferService{
+	rpc getStampInformation(GrpcGetStampInformationRequest) returns (GrpcGetStampInformationResponse);
+}
+
+
+message GrpcGetStampInformationRequest{
+	string prefix = 1;
+	int64 idStart = 2;
+	int64 idEnd = 3;
+	int64 ownerId = 4;
+	int32 excludeQr = 5;
+}
+
+message GrpcGetStampInformationResponse {
+	int32 code = 1;
+  	string message = 2;
+  	GrpcGetStampInformationData data = 3;
+}
+
+
+message GrpcGetStampInformationData {
+	string codeQRM = 1;
+	string codeQRI = 2;
+	string codeSMS = 3;
+	int32 status = 4;
+	string batchName = 5;
+	string exportDate = 6;
+	string services = 7;
+	string productName = 8;
+	string productImage = 9;
+	bool owner = 10;
+	int64 batchId = 11;
+	int32 isBlocked = 12;
+	string prefix = 13;
+	int64 idStart = 14;
+	int64 idEnd = 15;
+	string internalSerial = 16;
+	string internalQRM = 17;
+	string internalQRI = 18;
+	string internalSMS = 19;
+	GrpcRestoreInfo restoreInfo = 20;
+}
+
+
+message GrpcRestoreInfo {
+	string reason = 1;
+	int64 userCreatedById = 2;
+	string userCreatedByName = 3;
+	string createdDate = 4;
+}
+

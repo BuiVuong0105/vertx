@@ -41,6 +41,8 @@ public class GatewayVerticle extends AbstractVerticle {
 //		});
 		
 //		WorkerExecutor executor = vertx.createSharedWorkerExecutor("bvv-worker");
+		
+
 		router.get("/api/v1/hello").handler(this::hello);
 		router.get("/api/v1/hello/:name").handler(this::helloIdentity);
 		router.get("/api/v1/execute/:name").handler(r -> execute(r, null));
@@ -56,8 +58,6 @@ public class GatewayVerticle extends AbstractVerticle {
 		vertx.createHttpServer().requestHandler(router).listen(port);
 		
 		start.complete();
-		
-//		executeBlockingCode(null);
 
 		System.out.println(String.format("HttpServer Start Success With Port: %s", port));
 	}
