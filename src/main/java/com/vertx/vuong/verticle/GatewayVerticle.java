@@ -2,6 +2,9 @@ package com.vertx.vuong.verticle;
 
 import java.util.UUID;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -22,13 +25,15 @@ import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
 
 public class GatewayVerticle extends AbstractVerticle {
+	
+	private static final Logger LOGGER = LogManager.getLogger(GatewayVerticle.class);
 
 	private String verticleId = UUID.randomUUID().toString();
 
 	@Override
 	public void start(Promise<Void> start) {
 		
-		System.out.println(String.format("[%s] Deploy GatewayVerticle: %s, VerticleId: %s, Context: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId, context));
+		LOGGER.info(String.format("[%s] Deploy GatewayVerticle: %s, VerticleId: %s, Context: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId, context));
 		
 		Router router = Router.router(vertx);
 		

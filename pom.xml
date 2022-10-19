@@ -17,6 +17,7 @@
 		<!-- Maven plugins -->
 		<vertx-maven-plugin.version>1.0.25</vertx-maven-plugin.version>
 		<jdk.version>1.8</jdk.version>
+		<apacheLoggingVersion>2.13.3</apacheLoggingVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -106,6 +107,38 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${apacheLoggingVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${apacheLoggingVersion}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>${apacheLoggingVersion}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.30</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.12.0</version>
+		</dependency>
+
+
+		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java-util</artifactId>
 			<version>3.5.1</version>
@@ -133,24 +166,12 @@
 		<plugins>
 
 			<!-- run by Main Verticle -->
-			<plugin>
-				<groupId>io.reactiverse</groupId>
-				<artifactId>vertx-maven-plugin</artifactId>
-				<version>${vertx-maven-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>vmp</id>
-						<goals>
-							<goal>initialize</goal>
-							<goal>package</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<redeploy>true</redeploy>
-				</configuration>
-			</plugin>
-			
+			<!-- <plugin> <groupId>io.reactiverse</groupId> <artifactId>vertx-maven-plugin</artifactId> 
+				<version>${vertx-maven-plugin.version}</version> <executions> <execution> 
+				<id>vmp</id> <goals> <goal>initialize</goal> <goal>package</goal> </goals> 
+				</execution> </executions> <configuration> <redeploy>true</redeploy> </configuration> 
+				</plugin> -->
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -161,7 +182,7 @@
 			</plugin>
 
 			<!-- run by Main method -->
-			<!-- <plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>2.3</version>
@@ -185,7 +206,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin> -->
+			</plugin>
 
 			<plugin>
 				<groupId>org.xolstice.maven.plugins</groupId>
@@ -205,8 +226,8 @@
 						</protocPlugin>
 					</protocPlugins>
 				</configuration>
-				
-				<!-- <executions>
+
+				<executions>
 					<execution>
 						<id>compile</id>
 						<configuration>
@@ -225,8 +246,8 @@
 							<goal>test-compile-custom</goal>
 						</goals>
 					</execution>
-				</executions> -->
-				
+				</executions>
+
 			</plugin>
 
 		</plugins>

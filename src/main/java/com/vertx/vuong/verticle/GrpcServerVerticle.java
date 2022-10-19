@@ -16,7 +16,7 @@ public class GrpcServerVerticle extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> start) throws Exception {
 
-		System.out.println(String.format("[%s] Deploy GrpcServerVerticle: %s, VerticleId: %s, Context: %s", Thread.currentThread().getName(), this.getClass().getName(), verticleId, context));
+//		System.out.println(String.format("[%s] Deploy GrpcServerVerticle: %s, VerticleId: %s, Context: %s", Thread.currentThread().getName(), this.getClass().getName(), verticleId, context));
 
 		GrpcServer grpcServer = GrpcServer.server(vertx);
 

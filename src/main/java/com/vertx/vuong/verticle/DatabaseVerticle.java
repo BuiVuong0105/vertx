@@ -21,7 +21,7 @@ public class DatabaseVerticle extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> start) {
 		
-		System.out.println(String.format("[%s] Deploy DatabaseVerticle: %s, VerticleId: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId));
+//		System.out.println(String.format("[%s] Deploy DatabaseVerticle: %s, VerticleId: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId));
 		
 		configSqlClient()
 		

@@ -21,7 +21,7 @@ public class GrpcClientVerticle extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> start) throws Exception {
 
-		System.out.println(String.format("[%s] Deploy GrpcClientVerticle: %s, VerticleId: %s, Context: %s",Thread.currentThread().getName(), this.getClass().getName(), verticleId, context));
+//		System.out.println(String.format("[%s] Deploy GrpcClientVerticle: %s, VerticleId: %s, Context: %s",Thread.currentThread().getName(), this.getClass().getName(), verticleId, context));
 		
 		GrpcClient client = GrpcClient.client(vertx);
 		

@@ -1,5 +1,14 @@
 package com.vertx.vuong;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+
 import com.vertx.vuong.verticle.DatabaseVerticle;
 import com.vertx.vuong.verticle.GatewayVerticle;
 import com.vertx.vuong.verticle.GrpcClientVerticle;
@@ -24,14 +33,18 @@ import io.vertx.core.json.JsonObject;
 // Cluster application phân tải công việc đến từng node thông qua eventbus
 // java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar --conf config/testconfig1.json --options config/vertxoption.json
 public class MainApplication  {
+	
+	private static final Logger LOGGER = LogManager.getLogger(MainApplication.class);
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws Exception {
 		new MainApplication().start();
 	}
 	
-	public void start() throws InterruptedException {
+	public void start() throws Exception {
 		
 		System.out.println(String.format("[%s] Start MainApplication--------------", Thread.currentThread().getName()));
+		
+		loadLogging();
 		
 		Vertx vertx = Vertx.vertx(new VertxOptions().setPreferNativeTransport(true).setEventLoopPoolSize(10).setWorkerPoolSize(3).setBlockedThreadCheckInterval(5 * 10 * 1000));
 		
@@ -126,6 +139,33 @@ public class MainApplication  {
 		});
 		
 		return CompositeFuture.all(futureGw, futureHello, futureTcpServer, futureDatabase, futureGrpcServer, futureGrpcClient).mapEmpty();
+	}
+	
+	private void loadLogging() throws URISyntaxException {
+
+		String loggingConfig = System.getProperty("vertx.logging.config");
+
+		File file = null;
+
+		if (StringUtils.isBlank(loggingConfig)) {
+			
+			LOGGER.info("Load config from class path");
+
+			ClassLoader classLoader = getClass().getClassLoader();
+
+			URL resource = classLoader.getResource("log4j.xml");
+
+			file = new File(resource.toURI());
+		}
+
+		else {
+			LOGGER.info("Load config from: {}", loggingConfig);
+			file = new File(loggingConfig);
+		}
+
+		LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+
+		context.setConfigLocation(file.toURI());
 	}
 }
 

@@ -10,7 +10,7 @@ public class TcpServerVerticle extends AbstractVerticle {
 	@Override
 	public void start() throws Exception {
 
-		System.out.println(String.format("Start TCPSERVER Verticle: %s", Thread.currentThread().getName()));
+//		System.out.println(String.format("Start TCPSERVER Verticle: %s", Thread.currentThread().getName()));
 
 		NetServerOptions options = new NetServerOptions().setPort(4321);
 
