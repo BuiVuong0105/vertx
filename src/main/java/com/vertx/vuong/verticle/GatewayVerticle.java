@@ -9,6 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -53,7 +54,7 @@ public class GatewayVerticle extends AbstractVerticle {
 
 		JsonObject httpJsonObject = config.getJsonObject("http");
 
-		int port = Integer.parseInt(System.getProperty("port", "8080"));
+		int port = Integer.parseInt(System.getProperty("http.port", "8080"));
 
 		vertx.createHttpServer().requestHandler(router).listen(port);
 		
@@ -72,7 +73,12 @@ public class GatewayVerticle extends AbstractVerticle {
 
 				System.out.println(String.format("Response: /api/v1/hello: %s", Thread.currentThread().getName()));
 
-				ctx.request().response().end((String) event.result().body());
+				String rsp = (String) event.result().body();
+				System.out.println("RSP: " + rsp);
+				ctx.request().response().putHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(rsp.length() * 2));
+				ctx.request().response().write(rsp);
+				ctx.request().response().write(rsp);
+				ctx.request().response().end();
 			};
 		});
 	}

@@ -31,7 +31,7 @@ public class MainApplication  {
 	
 	public void start() throws InterruptedException {
 		
-		System.out.println(String.format("[%s] Start MainApplication", Thread.currentThread().getName()));
+		System.out.println(String.format("[%s] Start MainApplication--------------", Thread.currentThread().getName()));
 		
 		Vertx vertx = Vertx.vertx(new VertxOptions().setPreferNativeTransport(true).setEventLoopPoolSize(10).setWorkerPoolSize(3).setBlockedThreadCheckInterval(5 * 10 * 1000));
 		

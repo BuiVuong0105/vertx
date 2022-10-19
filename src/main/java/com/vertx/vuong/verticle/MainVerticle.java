@@ -61,7 +61,7 @@ public class MainVerticle extends AbstractVerticle {
 		
 		Future<String> futureGw = Future.future(promise -> vertx.deployVerticle(GatewayVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise));
 		
-		Future<String> futureHello = Future.future(promise -> vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setInstances(1).setConfig(jsonObject), promise));
+		Future<String> futureHello = Future.future(promise -> vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setInstances(2).setConfig(jsonObject), promise));
 		
 		return CompositeFuture.all(futureGw, futureHello).mapEmpty();
 	}
