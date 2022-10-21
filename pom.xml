@@ -91,13 +91,11 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-grpc-server</artifactId>
-			<version>4.3.3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-grpc-client</artifactId>
-			<version>4.3.3</version>
 		</dependency>
 
 		<!-- Temporary for generated stubs -->
@@ -227,7 +225,7 @@
 					</protocPlugins>
 				</configuration>
 
-				<executions>
+				<!-- <executions>
 					<execution>
 						<id>compile</id>
 						<configuration>
@@ -246,7 +244,7 @@
 							<goal>test-compile-custom</goal>
 						</goals>
 					</execution>
-				</executions>
+				</executions> -->
 
 			</plugin>
 
