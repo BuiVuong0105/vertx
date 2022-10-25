@@ -2,6 +2,9 @@ package com.vertx.vuong.verticle;
 
 import java.util.UUID;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.vertx.vuong.grpc.controller.TransferController;
 
 import io.vertx.core.AbstractVerticle;
@@ -11,12 +14,14 @@ import io.vertx.grpc.server.GrpcServiceBridge;
 
 public class GrpcServerVerticle extends AbstractVerticle {
 
+	static final Logger LOGGER = LogManager.getLogger(GrpcServerVerticle.class);
+
 	private String verticleId = UUID.randomUUID().toString();
 
 	@Override
 	public void start(Promise<Void> start) throws Exception {
-
-//		System.out.println(String.format("[%s] Deploy GrpcServerVerticle: %s, VerticleId: %s, Context: %s", Thread.currentThread().getName(), this.getClass().getName(), verticleId, context));
+		
+		LOGGER.info("Deploy {} VerticleId: {}, Context: {}", this.getClass().getName() ,verticleId, context);
 
 		GrpcServer grpcServer = GrpcServer.server(vertx);
 

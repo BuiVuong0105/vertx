@@ -2,6 +2,9 @@ package com.vertx.vuong.verticle;
 
 import java.util.UUID;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -14,6 +17,8 @@ import io.vertx.ext.sql.SQLConnection;
 
 public class DatabaseVerticle extends AbstractVerticle {
 	
+	static final Logger LOGGER = LogManager.getLogger(DatabaseVerticle.class);
+
 	private String verticleId = UUID.randomUUID().toString();
 
 	private SQLClient sqlClient;
@@ -21,17 +26,17 @@ public class DatabaseVerticle extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> start) {
 		
-//		System.out.println(String.format("[%s] Deploy DatabaseVerticle: %s, VerticleId: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId));
+		LOGGER.info("Deploy {} VerticleId: {}, Context: {}", this.getClass().getName() ,verticleId, context);
 		
 		configSqlClient()
 		
 		.onComplete(handler -> {
-			System.out.println(String.format("[%s] Connect DB Success: VerticleId: %s", Thread.currentThread().getName() ,verticleId));
+			LOGGER.info("Connect DB Success");
 			start.complete();
 		})
 		
 		.onFailure(handler -> {
-			System.out.println(String.format("[%s]Connect DB fail: %s, VerticleId: %s", Thread.currentThread().getName(), handler.getStackTrace() ,verticleId));
+			LOGGER.info("Connect DB Fail");
 			start.fail(handler.getCause());
 		});
 	}

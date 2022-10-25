@@ -27,7 +27,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.SLF4JLogDelegateFactory;
 
 // Clustering dựa vào lệnh java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar --conf config/testconfig1.json -cluster -Djava.net.preferIPv4Stack=true -Dhttp.port=8090
 // Đây là khai báo cluster nếu chạy dựa trên đối tượng vertx của hệ thống tạo ra sẵn, còn nếu tự tạo vertx riêng thì phải cấu hình cluster
@@ -43,7 +42,7 @@ public class MainApplication  {
 	
 	public void start() throws Exception {
 		
-		System.out.println(String.format("[%s] Start MainApplication--------------", Thread.currentThread().getName()));
+		LOGGER.info("[%s] Start MainApplication--------------");
 		
 //		loadLogging();
 		
@@ -86,11 +85,11 @@ public class MainApplication  {
 		doConfig(vertx).compose(jsonObject -> doDeployVerticle(vertx, jsonObject))
 		
 				.onComplete(result -> {
-					System.out.println(String.format("Deploy Vericle Succes: %s", Thread.currentThread().getName()));
+					LOGGER.info("Deploy All Vericle Succes: {}");
 				})
 				
 				.onFailure(throwable -> {
-					System.out.println(String.format("Deploy Vericle Fail: %s, Thread: %s", throwable.toString(), Thread.currentThread().getName()));
+					LOGGER.info("Deploy All Vericle Fail: {}");
 				});
 	}
 	
@@ -122,7 +121,7 @@ public class MainApplication  {
 		});
 		
 		Future<String> futureHello = Future.future(promise -> {
-			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(true).setConfig(jsonObject), promise);
+			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(false).setInstances(1).setConfig(jsonObject), promise);
 		});
 		
 		Future<String> futureTcpServer = Future.future(promise -> {
@@ -134,7 +133,7 @@ public class MainApplication  {
 		});
 		
 		Future<String> futureGrpcServer = Future.future(promise -> {
-			vertx.deployVerticle(GrpcServerVerticle.class.getName(), new DeploymentOptions().setInstances(3).setConfig(jsonObject), promise);
+			vertx.deployVerticle(GrpcServerVerticle.class.getName(), new DeploymentOptions().setInstances(1).setConfig(jsonObject), promise);
 		});
 		
 		Future<String> futureGrpcClient = Future.future(promise -> {

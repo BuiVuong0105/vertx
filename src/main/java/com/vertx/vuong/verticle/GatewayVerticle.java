@@ -7,22 +7,14 @@ import org.apache.logging.log4j.Logger;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.CSRFHandler;
-import io.vertx.ext.web.handler.CorsHandler;
-import io.vertx.ext.web.handler.LoggerHandler;
-import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.handler.StaticHandler;
-import io.vertx.ext.web.sstore.LocalSessionStore;
-import io.vertx.ext.web.sstore.SessionStore;
 
 public class GatewayVerticle extends AbstractVerticle {
 	
@@ -33,7 +25,7 @@ public class GatewayVerticle extends AbstractVerticle {
 	@Override
 	public void start(Promise<Void> start) {
 		
-		LOGGER.info(String.format("[%s] Deploy GatewayVerticle: %s, VerticleId: %s, Context: %s", Thread.currentThread().getName(), this.getClass().getName() ,verticleId, context));
+		LOGGER.info("Deploy {}  VerticleId: {}, Context: {}", this.getClass().getName() ,verticleId, context);
 		
 		Router router = Router.router(vertx);
 		
@@ -46,53 +38,43 @@ public class GatewayVerticle extends AbstractVerticle {
 //			}
 //		});
 		
-//		WorkerExecutor executor = vertx.createSharedWorkerExecutor("bvv-worker");
-		
-
 		router.get("/api/v1/hello").handler(this::hello);
 		router.get("/api/v1/hello/:name").handler(this::helloIdentity);
 		router.get("/api/v1/execute/:name").handler(r -> execute(r, null));
 		
 		router.route().handler(StaticHandler.create("web").setIndexPage("index.html"));
 		
-		JsonObject config = config();
-
-		JsonObject httpJsonObject = config.getJsonObject("http");
-
 		int port = Integer.parseInt(System.getProperty("http.port", "8080"));
 
 		vertx.createHttpServer().requestHandler(router).listen(port);
 		
 		start.complete();
 
-		System.out.println(String.format("HttpServer Start Success With Port: %s", port));
+		LOGGER.info("HttpServer Start Success With Port: {}", port);
 	}
 	
 	public void hello(RoutingContext ctx) {
+		
+		ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
 
-		System.out.println(String.format("Request: /api/v1/hello: %s", Thread.currentThread().getName()));
+		LOGGER.info("Request: /api/v1/hello, Context: {}", context.unwrap());
 
 		this.vertx.eventBus().request("address.hello", "", new Handler<AsyncResult<Message<Object>>>() {
 
 			public void handle(AsyncResult<Message<Object>> event) {
-
-				System.out.println(String.format("Response: /api/v1/hello: %s", Thread.currentThread().getName()));
-
+				ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
+				LOGGER.info("Response: /api/v1/hello: {}", context.unwrap());
 				String rsp = (String) event.result().body();
-				System.out.println("RSP: " + rsp);
-				ctx.request().response().putHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(rsp.length() * 2));
-				ctx.request().response().write(rsp);
-				ctx.request().response().write(rsp);
-				ctx.request().response().end();
+				ctx.request().response().end(rsp);
 			};
 		});
 	}
 
 	public void helloIdentity(RoutingContext ctx) {
 		
-		Context context = vertx.getOrCreateContext();
+		ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
 		
-		System.out.println(String.format("Request: /api/v1/hello/:name: %s, Context: %s", Thread.currentThread().getName(),context) );
+		LOGGER.info("Request: /api/v1/hello/:name, Context: {}",context.unwrap());
 		
 		String name = ctx.pathParam("name");
 		
@@ -100,11 +82,8 @@ public class GatewayVerticle extends AbstractVerticle {
 			
 			@Override
 			public void handle(AsyncResult<Message<Object>> event) {
-				
-				Context context = vertx.getOrCreateContext();
-				
-				System.out.println(String.format("Response: /api/v1/:name: %s, context: %s", Thread.currentThread().getName(), context));
-				
+				ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
+				System.out.println(String.format("Response: /api/v1/:name: %s, context: %s", Thread.currentThread().getName(), context.unwrap()));
 				ctx.request().response().end((String) event.result().body());
 			}
 		});
@@ -112,14 +91,11 @@ public class GatewayVerticle extends AbstractVerticle {
 	
 	public void execute(RoutingContext ctx, WorkerExecutor executor) {
 		
-		System.out.println(String.format("Request: /api/v1/execute/:name: %s", Thread.currentThread().getName()));
-		
 		executeBlockingCode(executor);
 		
 		ctx.request().response().end("ok");
 	}
 	
-	// Run blocking code trong worker thread and execute handle result in eventloop
 	private void executeBlockingCode(WorkerExecutor executor) {
 		for (int i = 0; i <= 0; i++) {
 			int index = i;
@@ -143,24 +119,5 @@ public class GatewayVerticle extends AbstractVerticle {
 			});
 			System.out.println(String.format("End Index %s, Thread: %s", index, Thread.currentThread().getName()));
 		}
-	}
-	
-	// Sequential Composition - Do A, Then B, Then C .... Handler Errors
-	// Concurrent Composition - Do A and B and C and D .... and once all/any complete - So something else ...
-	private void executeAsynchronous() {
-		
-	}
-	
-	private void configExtra(Router router) {
-		
-		SessionStore sessionStore = LocalSessionStore.create(vertx); // Session trong local || ClusteredSessionStore.create(vertx); // Session trong cluster
-		
-		router.route().handler(SessionHandler.create(sessionStore));
-		
-		router.route().handler(CorsHandler.create("*"));
-		
-		router.route().handler(LoggerHandler.create());
-		
-		router.route().handler(CSRFHandler.create(vertx, "asdashdlasd4a45d4a2df45sdf2sdf1s53d@@@!##$#%#$%"));
 	}
 }

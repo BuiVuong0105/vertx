@@ -3,6 +3,9 @@ package com.vertx.vuong.verticle;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.vertx.vuong.grpc.GrpcGetStampInformationRequest;
 import com.vertx.vuong.grpc.GrpcGetStampInformationResponse;
 import com.vertx.vuong.grpc.TransferServiceGrpc;
@@ -16,12 +19,14 @@ import io.vertx.grpc.client.GrpcClientChannel;
 
 public class GrpcClientVerticle extends AbstractVerticle {
 
+	static final Logger LOGGER = LogManager.getLogger(GrpcClientVerticle.class);
+
 	private String verticleId = UUID.randomUUID().toString();
 
 	@Override
 	public void start(Promise<Void> start) throws Exception {
 
-//		System.out.println(String.format("[%s] Deploy GrpcClientVerticle: %s, VerticleId: %s, Context: %s",Thread.currentThread().getName(), this.getClass().getName(), verticleId, context));
+		LOGGER.info("Deploy {} VerticleId: {}, Context: {}", this.getClass().getName() , verticleId, context);
 		
 		GrpcClient client = GrpcClient.client(vertx);
 		
@@ -31,29 +36,24 @@ public class GrpcClientVerticle extends AbstractVerticle {
 		
 		TransferServiceGrpc.TransferServiceStub transferServiceStup = TransferServiceGrpc.newStub(channel);
 		
-		System.out.println("Pre Send");
-		
 		transferServiceStup.withDeadlineAfter(3, TimeUnit.SECONDS).getStampInformation(GrpcGetStampInformationRequest.newBuilder().setPrefix("BVV").setIdStart(1).setIdEnd(10).build(), new StreamObserver<GrpcGetStampInformationResponse>() {
 			
 			@Override
 			public void onNext(GrpcGetStampInformationResponse value) {
-				System.out.println(String.format("[%s] Response Process Item",Thread.currentThread().getName()));
-				System.out.println(value);
+				LOGGER.info("Response onNext({})", value);
 			}
 			
 			@Override
 			public void onError(Throwable t) {
-				System.out.println(String.format("[%s] Response Error",Thread.currentThread().getName()));
+				LOGGER.info("Response onError({})", t);
 			}
 			
 			@Override
 			public void onCompleted() {
-				System.out.println(String.format("[%s] Response Oncomplete",Thread.currentThread().getName()));
+				LOGGER.info("Response onCompleted()");
 			}
 		});
-		
-		System.out.println("End Send");
-//
+
 //		MethodDescriptor<GrpcGetStampInformationRequest, GrpcGetStampInformationResponse> sayHelloMethod = TransferServiceGrpc.getGetStampInformationMethod();
 //
 //		Future<GrpcClientRequest<GrpcGetStampInformationRequest, GrpcGetStampInformationResponse>> fut = client.request(server, sayHelloMethod);
