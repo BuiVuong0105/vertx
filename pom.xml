@@ -12,7 +12,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<!-- vert.x properties -->
-		<vertx.version>4.3.3</vertx.version>
+		<vertx.version>4.3.4</vertx.version>
 		<vertx.verticle>com.vertx.vuong.verticle.MainVerticle</vertx.verticle>
 		<!-- Maven plugins -->
 		<vertx-maven-plugin.version>1.0.25</vertx-maven-plugin.version>
@@ -44,11 +44,21 @@
 			<artifactId>vertx-web</artifactId>
 		</dependency>
 
+		<!-- <dependency> <groupId>io.vertx</groupId> <artifactId>vertx-infinispan</artifactId> 
+			<version>4.3.4</version>$NO-MVN-MAN-VER$ </dependency> -->
+
 		<dependency>
 			<groupId>io.vertx</groupId>
-			<artifactId>vertx-infinispan</artifactId>
-			 <version>4.3.4</version><!--$NO-MVN-MAN-VER$-->
+			<artifactId>vertx-hazelcast</artifactId>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast -->
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast</artifactId>
+			<version>4.2.5</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>io.vertx</groupId>
@@ -226,26 +236,11 @@
 					</protocPlugins>
 				</configuration>
 
-				<!-- <executions>
-					<execution>
-						<id>compile</id>
-						<configuration>
-							<outputDirectory>${project.basedir}/src/main/java</outputDirectory>
-							<clearOutputDirectory>false</clearOutputDirectory>
-						</configuration>
-						<goals>
-							<goal>compile</goal>
-							<goal>compile-custom</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>test-compile</id>
-						<goals>
-							<goal>test-compile</goal>
-							<goal>test-compile-custom</goal>
-						</goals>
-					</execution>
-				</executions> -->
+				<!-- <executions> <execution> <id>compile</id> <configuration> <outputDirectory>${project.basedir}/src/main/java</outputDirectory> 
+					<clearOutputDirectory>false</clearOutputDirectory> </configuration> <goals> 
+					<goal>compile</goal> <goal>compile-custom</goal> </goals> </execution> <execution> 
+					<id>test-compile</id> <goals> <goal>test-compile</goal> <goal>test-compile-custom</goal> 
+					</goals> </execution> </executions> -->
 
 			</plugin>
 
