@@ -6,11 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.core.WorkerExecutor;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -40,7 +36,6 @@ public class GatewayVerticle extends AbstractVerticle {
 		
 		router.get("/api/v1/hello").handler(this::hello);
 		router.get("/api/v1/hello/:name").handler(this::helloIdentity);
-		router.get("/api/v1/execute/:name").handler(r -> execute(r, null));
 		
 		router.route().handler(StaticHandler.create("web").setIndexPage("index.html"));
 		
@@ -59,14 +54,11 @@ public class GatewayVerticle extends AbstractVerticle {
 
 		LOGGER.info("Request: /api/v1/hello, Context: {}", context.unwrap());
 
-		this.vertx.eventBus().request("address.hello", "", new Handler<AsyncResult<Message<Object>>>() {
-
-			public void handle(AsyncResult<Message<Object>> event) {
-				ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
-				LOGGER.info("Response: /api/v1/hello: {}", context.unwrap());
-				String rsp = (String) event.result().body();
-				ctx.request().response().end(rsp);
-			};
+		this.vertx.eventBus().request("address.hello", "", event -> {
+			ContextInternal contextSub = (ContextInternal) vertx.getOrCreateContext();
+			LOGGER.info("Response: /api/v1/hello: {}", contextSub.unwrap());
+			String rsp = (String) event.result().body();
+			ctx.request().response().end(rsp);
 		});
 	}
 
@@ -78,46 +70,11 @@ public class GatewayVerticle extends AbstractVerticle {
 		
 		String name = ctx.pathParam("name");
 		
-		this.vertx.eventBus().request("address.hello.name", name, new Handler<AsyncResult<Message<Object>>>() {
-			
-			@Override
-			public void handle(AsyncResult<Message<Object>> event) {
-				ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
-				System.out.println(String.format("Response: /api/v1/:name: %s, context: %s", Thread.currentThread().getName(), context.unwrap()));
-				ctx.request().response().end((String) event.result().body());
-			}
+		this.vertx.eventBus().request("address.hello.name", name, event -> {
+			ContextInternal contextSub = (ContextInternal) vertx.getOrCreateContext();
+			System.out.println(String.format("Response: /api/v1/:name: %s, context: %s", Thread.currentThread().getName(), contextSub.unwrap()));
+			ctx.request().response().end((String) event.result().body());
+		
 		});
-	}
-	
-	public void execute(RoutingContext ctx, WorkerExecutor executor) {
-		
-		executeBlockingCode(executor);
-		
-		ctx.request().response().end("ok");
-	}
-	
-	private void executeBlockingCode(WorkerExecutor executor) {
-		for (int i = 0; i <= 0; i++) {
-			int index = i;
-			vertx.executeBlocking(new Handler<Promise<String>>() {
-				@Override
-				public void handle(Promise<String> event) {
-					System.out.println(String.format("Blocking Handler %s, Thread: %s", index, Thread.currentThread().getName()));
-					try {
-						Thread.sleep(500000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-						event.fail(e);
-					}
-					event.complete("ok");
-				}
-			}, false, new Handler<AsyncResult<String>>() {
-				@Override
-				public void handle(AsyncResult<String> event) {
-					System.out.println(String.format("Result Handler %s, Thread: %s", index, Thread.currentThread().getName()));
-				}
-			});
-			System.out.println(String.format("End Index %s, Thread: %s", index, Thread.currentThread().getName()));
-		}
 	}
 }

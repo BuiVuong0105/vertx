@@ -53,11 +53,11 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.hazelcast</groupId>
 			<artifactId>hazelcast</artifactId>
 			<version>4.2.5</version>
-		</dependency>
+		</dependency> -->
 
 
 		<dependency>

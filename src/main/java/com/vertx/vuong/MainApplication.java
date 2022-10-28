@@ -4,12 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.hazelcast.config.Config;
-import com.vertx.vuong.verticle.DatabaseVerticle;
 import com.vertx.vuong.verticle.GatewayVerticle;
-import com.vertx.vuong.verticle.GrpcClientVerticle;
-import com.vertx.vuong.verticle.GrpcServerVerticle;
 import com.vertx.vuong.verticle.HelloVerticle;
-import com.vertx.vuong.verticle.TcpServerVerticle;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -17,19 +13,18 @@ import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.cluster.ClusterManager;
+import io.vertx.spi.cluster.hazelcast.ConfigUtil;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 // Clustering dựa vào lệnh java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar --conf config/testconfig1.json -cluster -Djava.net.preferIPv4Stack=true -Dhttp.port=8090
 // Đây là khai báo cluster nếu chạy dựa trên đối tượng vertx của hệ thống tạo ra sẵn, còn nếu tự tạo vertx riêng thì phải cấu hình cluster
 // Cluster application phân tải công việc đến từng node thông qua eventbus
 // java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar --conf config/testconfig1.json --options config/vertxoption.json
-// java -Dvertx.hazelcast.config=./config/cluster.xml -Dhttp.port=8082 -jar target/vertx-dev-1.0.0-SNAPSHOT-run.jar -cluster -Djava.net.preferIPv4Stack=true
+// java -Dvertx.hazelcast.config=./config/cluster-custom.xml -Dhttp.port=8082 -jar target/vertx-dev-1.0.0-SNAPSHOT-run.jar -cluster -Djava.net.preferIPv4Stack=true
 public class MainApplication  {
 	
 	private static final Logger LOGGER = LogManager.getLogger(MainApplication.class);
@@ -42,17 +37,13 @@ public class MainApplication  {
 		
 		LOGGER.info("[%s] Start MainApplication--------------");
 		
-//		Vertx vertx = Vertx.vertx(new VertxOptions().setPreferNativeTransport(true).setEventLoopPoolSize(10).setWorkerPoolSize(3).setBlockedThreadCheckInterval(5 * 10 * 1000));
-		
-//		ClusterManager mgr = new InfinispanClusterManager();
-		
-		Config hazelcastConfig = new Config();
+		Config hazelcastConfig =  ConfigUtil.loadConfig(); // mặc định load default-cluster trong class path, hoặc load theo config
+		hazelcastConfig.setClusterName("MIT-Cluster");
 		
 		// some configuration settings
 		ClusterManager mgr = new HazelcastClusterManager(hazelcastConfig);
 
-		
-		VertxOptions options = new VertxOptions().setClusterManager(mgr);;
+		VertxOptions options = new VertxOptions().setPreferNativeTransport(true).setEventLoopPoolSize(10).setWorkerPoolSize(3).setBlockedThreadCheckInterval(5 * 10 * 1000).setClusterManager(mgr);;
 		
 		Vertx.clusteredVertx(options, res -> {
 
@@ -74,17 +65,6 @@ public class MainApplication  {
 				LOGGER.info("Cluster Fail: {}", res.cause());
 			}
 		});
-
-		
-//		doConfig(vertx).compose(jsonObject -> doDeployVerticle(vertx, jsonObject))
-//		
-//				.onComplete(result -> {
-//					LOGGER.info("Deploy All Vericle Succes: {}");
-//				})
-//				
-//				.onFailure(throwable -> {
-//					LOGGER.info("Deploy All Vericle Fail: {}");
-//				});
 	}
 	
 	private Future<JsonObject> doConfig(Vertx vertx) {
@@ -95,12 +75,7 @@ public class MainApplication  {
 		
 		ConfigRetriever configRetriever = ConfigRetriever.create(vertx, opts);
 		
-		Future<JsonObject> future = Future.future(new Handler<Promise<JsonObject>>() {
-			@Override
-			public void handle(Promise<JsonObject> promise) {
-				configRetriever.getConfig(promise);
-			}
-		});
+		Future<JsonObject> future = Future.future(promise -> configRetriever.getConfig(promise));
 		
 		return future;
 	}
