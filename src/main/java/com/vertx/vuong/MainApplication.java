@@ -25,6 +25,7 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 // Cluster application phân tải công việc đến từng node thông qua eventbus
 // java -jar target/vertx-dev-1.0.0-SNAPSHOT.jar --conf config/testconfig1.json --options config/vertxoption.json
 // java -Dvertx.hazelcast.config=./config/cluster-custom.xml -Dhttp.port=8082 -jar target/vertx-dev-1.0.0-SNAPSHOT-run.jar -cluster -Djava.net.preferIPv4Stack=true
+// docker run -p 8080:8080 -e JAVA_TOOL_OPTIONS="-Dvertx.eventloop.poolsize=20 -Dvertx.worker.poolsize=10 -Dvertx.profile.active=prod" imageId
 public class MainApplication  {
 	
 	private static final Logger LOGGER = LogManager.getLogger(MainApplication.class);
