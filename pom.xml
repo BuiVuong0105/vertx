@@ -18,6 +18,7 @@
 		<vertx-maven-plugin.version>1.0.25</vertx-maven-plugin.version>
 		<jdk.version>1.8</jdk.version>
 		<apacheLoggingVersion>2.13.3</apacheLoggingVersion>
+		<docker-image-version>1.0.0-production-6</docker-image-version>
 	</properties>
 
 	<dependencyManagement>
@@ -53,11 +54,8 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast -->
-		<!-- <dependency>
-			<groupId>com.hazelcast</groupId>
-			<artifactId>hazelcast</artifactId>
-			<version>4.2.5</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>com.hazelcast</groupId> <artifactId>hazelcast</artifactId> 
+			<version>4.2.5</version> </dependency> -->
 
 
 		<dependency>
@@ -242,6 +240,29 @@
 					<id>test-compile</id> <goals> <goal>test-compile</goal> <goal>test-compile-custom</goal> 
 					</goals> </execution> </executions> -->
 
+
+
+			</plugin>
+
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>1.4.10</version>
+				<configuration>
+					<repository>registry.icheck.com.vn/qcheck/qr_aps</repository>
+					<tag>${docker-image-version}</tag>
+					<!-- <skip>true</skip> -->
+				</configuration>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>build</goal>
+							<goal>tag</goal>
+							<goal>push</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>

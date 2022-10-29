@@ -69,7 +69,7 @@ public class MainApplication  {
 	
 	private Future<JsonObject> doConfig(Vertx vertx) {
 		
-		ConfigStoreOptions defaultConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "./config/testconfig.json"));
+		ConfigStoreOptions defaultConfig = new ConfigStoreOptions().setType("file").setFormat("json").setConfig(new JsonObject().put("path", "config.json"));
 		
 		ConfigRetrieverOptions opts = new ConfigRetrieverOptions().addStore(defaultConfig);
 		

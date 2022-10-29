@@ -25,14 +25,14 @@ public class GatewayVerticle extends AbstractVerticle {
 		
 		Router router = Router.router(vertx);
 		
-//		router.route().handler(context -> {
-//			String authToken = context.request().getHeader("auth_token");
-//			if ("vuongbv0105".equals(authToken)) {
-//				context.next();
-//			}else {
-//				context.response().setStatusCode(401).setStatusMessage("Access Denied...! ").end("Access Denied...! ");
-//			}
-//		});
+		router.route().handler(context -> {
+			String authToken = context.request().getHeader("auth_token");
+			if ("vuongbv0105".equals(authToken)) {
+				context.next();
+			}else {
+				context.response().setStatusCode(401).setStatusMessage("Access Denied...! ").end("Access Denied...! ");
+			}
+		});
 		
 		router.get("/api/v1/hello").handler(this::hello);
 		router.get("/api/v1/hello/:name").handler(this::helloIdentity);

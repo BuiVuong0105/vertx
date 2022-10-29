@@ -1,0 +1,1 @@
+mvn install -DskipTests -Ddockerfile.skip=true
