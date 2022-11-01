@@ -24,7 +24,9 @@ public class HelloVerticle extends AbstractVerticle {
 			LOGGER.info("Deploy {} VerticleId: {}, Context: {}", this.getClass().getName() ,verticleId, context);
 
 			this.vertx.eventBus().consumer("address.hello", event -> {
+				
 				ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
+				
 				LOGGER.info("Consum address.hello context: {}", context.unwrap());
 				
 				SharedData sharedData = vertx.sharedData();

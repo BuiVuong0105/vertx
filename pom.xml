@@ -249,7 +249,7 @@
 				<artifactId>dockerfile-maven-plugin</artifactId>
 				<version>1.4.10</version>
 				<configuration>
-					<repository>registry.icheck.com.vn/qcheck/qr_aps</repository>
+					<repository>registry.icheck.com.vn/qcheck/vertx_demo</repository>
 					<tag>${docker-image-version}</tag>
 					<!-- <skip>true</skip> -->
 				</configuration>
