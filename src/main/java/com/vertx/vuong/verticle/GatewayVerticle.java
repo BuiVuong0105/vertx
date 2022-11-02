@@ -2,6 +2,7 @@ package com.vertx.vuong.verticle;
 
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +32,19 @@ public class GatewayVerticle extends AbstractVerticle {
 		
 		router.route().handler(StaticHandler.create("web").setIndexPage("index.html"));
 		
-		int port = Integer.parseInt(System.getProperty("http.port", "8080"));
+		int port = 8080;
+		
+		try {
+			String portEvn = System.getenv("http.port");
+			if(StringUtils.isNotBlank(portEvn)) {
+				port = Integer.parseInt(portEvn);
+			}
+			else {
+				port = Integer.parseInt(System.getProperty("http.port"));
+			}
+		} catch (Exception e) {
+			LOGGER.error("ERROR: {}", e);
+		}
 
 		vertx.createHttpServer().requestHandler(router).listen(port);
 		

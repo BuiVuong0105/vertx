@@ -18,7 +18,7 @@
 		<vertx-maven-plugin.version>1.0.25</vertx-maven-plugin.version>
 		<jdk.version>1.8</jdk.version>
 		<apacheLoggingVersion>2.13.3</apacheLoggingVersion>
-		<docker-image-version>1.0.0-production-6</docker-image-version>
+		<docker-image-version>1.0.0-test-1</docker-image-version>
 	</properties>
 
 	<dependencyManagement>
@@ -51,6 +51,12 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-hazelcast</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast-kubernetes</artifactId>
+			<version>2.2.3</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast -->
@@ -249,7 +255,7 @@
 				<artifactId>dockerfile-maven-plugin</artifactId>
 				<version>1.4.10</version>
 				<configuration>
-					<repository>registry.icheck.com.vn/qcheck/vertx_demo</repository>
+					<repository>registry.icheck.com.vn/qcheck/qr-aps/vertx_demo</repository>
 					<tag>${docker-image-version}</tag>
 					<!-- <skip>true</skip> -->
 				</configuration>
