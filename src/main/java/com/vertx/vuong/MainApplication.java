@@ -44,7 +44,7 @@ public class MainApplication  {
 		// some configuration settings
 		ClusterManager mgr = new HazelcastClusterManager(hazelcastConfig);
 
-		VertxOptions options = new VertxOptions().setPreferNativeTransport(true).setEventLoopPoolSize(10).setWorkerPoolSize(3).setBlockedThreadCheckInterval(5 * 10 * 1000).setClusterManager(mgr);;
+		VertxOptions options = new VertxOptions().setPreferNativeTransport(true).setEventLoopPoolSize(10).setWorkerPoolSize(3).setBlockedThreadCheckInterval(5 * 10 * 1000).setClusterManager(mgr);
 		
 		Vertx.clusteredVertx(options, res -> {
 
