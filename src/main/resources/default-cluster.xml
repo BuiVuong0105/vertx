@@ -4,22 +4,23 @@
            https://www.hazelcast.com/schema/config/hazelcast-config-4.2.xsd">
 
 	<properties>
-		<property name="hazelcast.mancenter.enabled">false</property>
+<!-- 		<property name="hazelcast.mancenter.enabled">false</property>
 		<property name="hazelcast.memcache.enabled">false</property>
 		<property name="hazelcast.rest.enabled">false</property>
-		<property name="hazelcast.discovery.enabled">true</property>
 		<property name="hazelcast.wait.seconds.before.join">0</property>
-		<property name="hazelcast.diagnostics.enabled">false</property>
+		<property name="hazelcast.diagnostics.enabled">false</property> -->
+		<property name="hazelcast.discovery.enabled">true</property>
 	</properties>
 
 	<network>
 		<join>
 			<multicast enabled="false" />
 			<tcp-ip enabled="false" />
-
 			<discovery-strategies>
 				<discovery-strategy enabled="true" class="com.hazelcast.kubernetes.HazelcastKubernetesDiscoveryStrategy">
 					<properties>
+						<!-- <property name="service-label-name">vertx01</property>
+						<property name="namespace">test-tech</property> -->
 						<property name="service-dns">vertx01.test-tech.svc.cluster.local</property>
 					</properties>
 				</discovery-strategy>

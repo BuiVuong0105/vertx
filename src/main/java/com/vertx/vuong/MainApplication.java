@@ -40,6 +40,9 @@ public class MainApplication  {
 		
 		Config hazelcastConfig =  ConfigUtil.loadConfig(); // mặc định load default-cluster trong class path, hoặc load theo config
 		hazelcastConfig.setClusterName("MIT-Cluster");
+//		hazelcastConfig.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+//		hazelcastConfig.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true);
+		hazelcastConfig.setProperty("service-dns", "vertx01.test-tech.svc.cluster.local");
 		
 		// some configuration settings
 		ClusterManager mgr = new HazelcastClusterManager(hazelcastConfig);
