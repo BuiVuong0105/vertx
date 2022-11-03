@@ -77,7 +77,7 @@ public class GatewayVerticle extends AbstractVerticle {
 		
 		this.vertx.eventBus().request("address.hello.name", name, event -> {
 			ContextInternal contextSub = (ContextInternal) vertx.getOrCreateContext();
-			System.out.println(String.format("Response: /api/v1/:name: %s, context: %s", Thread.currentThread().getName(), contextSub.unwrap()));
+			LOGGER.info("Response: /api/v1/hello/:name: {}", contextSub.unwrap());
 			ctx.request().response().end((String) event.result().body());
 		
 		});
