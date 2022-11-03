@@ -21,7 +21,6 @@ spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
-    app: vertx01
     component: vertx01 
     matchLabels:
       workload.user.cattle.io/workloadselector: deployment-test-tech-vertx01

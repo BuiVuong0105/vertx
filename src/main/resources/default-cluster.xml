@@ -4,11 +4,10 @@
            https://www.hazelcast.com/schema/config/hazelcast-config-4.2.xsd">
 
 	<properties>
-<!-- 		<property name="hazelcast.mancenter.enabled">false</property>
-		<property name="hazelcast.memcache.enabled">false</property>
-		<property name="hazelcast.rest.enabled">false</property>
-		<property name="hazelcast.wait.seconds.before.join">0</property>
-		<property name="hazelcast.diagnostics.enabled">false</property> -->
+		<!-- <property name="hazelcast.mancenter.enabled">false</property> <property 
+			name="hazelcast.memcache.enabled">false</property> <property name="hazelcast.rest.enabled">false</property> 
+			<property name="hazelcast.wait.seconds.before.join">0</property> <property 
+			name="hazelcast.diagnostics.enabled">false</property> -->
 		<property name="hazelcast.discovery.enabled">true</property>
 	</properties>
 
@@ -19,8 +18,6 @@
 			<discovery-strategies>
 				<discovery-strategy enabled="true" class="com.hazelcast.kubernetes.HazelcastKubernetesDiscoveryStrategy">
 					<properties>
-						<!-- <property name="service-label-name">vertx01</property>
-						<property name="namespace">test-tech</property> -->
 						<property name="service-dns">vertx01.test-tech.svc.cluster.local</property>
 					</properties>
 				</discovery-strategy>
@@ -28,5 +25,28 @@
 		</join>
 	</network>
 
+	<multimap name="__vertx.subs">
+		<backup-count>1</backup-count>
+		<value-collection-type>SET</value-collection-type>
+	</multimap>
+
+	<map name="__vertx.haInfo">
+		<backup-count>1</backup-count>
+	</map>
+
+	<map name="__vertx.nodeInfo">
+		<backup-count>1</backup-count>
+	</map>
+
+	<cp-subsystem>
+		<cp-member-count>0</cp-member-count>
+		<semaphores>
+			<semaphore>
+				<name>__vertx.*</name>
+				<jdk-compatible>false</jdk-compatible>
+				<initial-permits>1</initial-permits>
+			</semaphore>
+		</semaphores>
+	</cp-subsystem>
 
 </hazelcast>
