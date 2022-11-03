@@ -1,5 +1,6 @@
 package com.vertx.vuong;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,8 +39,7 @@ public class MainApplication  {
 		
 		LOGGER.info("[%s] Start MainApplication--------------");
 		
-		Config hazelcastConfig =  ConfigUtil.loadConfig(); // mặc định load default-cluster trong class path, hoặc load theo config
-		hazelcastConfig.setClusterName("MIT-Cluster");
+		Config hazelcastConfig = loadClusterConfig();
 		
 		// some configuration settings
 		ClusterManager mgr = new HazelcastClusterManager(hazelcastConfig);
@@ -66,6 +66,27 @@ public class MainApplication  {
 				LOGGER.info("Cluster Fail: {}", res.cause());
 			}
 		});
+	}
+	
+	private Config loadClusterConfig() {
+		
+		String hazecastFile = null;
+		
+		if(StringUtils.isNotBlank(System.getProperty("vertx.hazelcast.config"))) {
+			hazecastFile = System.getProperty("vertx.hazelcast.config");
+		}
+		
+		else if(StringUtils.isNotBlank(System.getenv("vertx.hazelcast.config"))) {
+			hazecastFile = System.getenv("vertx.hazelcast.config");
+		}
+		
+		if(StringUtils.isNotBlank(hazecastFile)) {
+			System.setProperty("vertx.hazelcast.config", hazecastFile);
+		}
+		
+		Config hazelcastConfig =  ConfigUtil.loadConfig(); // mặc định load default-cluster trong class path, hoặc load theo config
+		hazelcastConfig.setClusterName("MIT-Cluster");
+		return hazelcastConfig;
 	}
 	
 	private Future<JsonObject> doConfig(Vertx vertx) {
