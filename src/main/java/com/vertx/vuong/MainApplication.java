@@ -85,6 +85,12 @@ public class MainApplication  {
 		}
 		
 		Config hazelcastConfig =  ConfigUtil.loadConfig(); // mặc định load default-cluster trong class path, hoặc load theo config
+		
+//		hazelcastConfig.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+//		hazelcastConfig.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true);
+//		hazelcastConfig.setProperty("namespace", "MY-KUBERNETES-NAMESPACE");
+//		hazelcastConfig.setProperty("service-name", "MY-SERVICE-NAME");
+		
 		hazelcastConfig.setClusterName("MIT-Cluster");
 		return hazelcastConfig;
 	}
