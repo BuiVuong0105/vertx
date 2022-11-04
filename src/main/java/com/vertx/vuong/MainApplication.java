@@ -88,10 +88,8 @@ public class MainApplication  {
 		
 		hazelcastConfig.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
 		hazelcastConfig.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true);
-//		hazelcastConfig.setProperty("namespace", "MY-KUBERNETES-NAMESPACE");
-//		hazelcastConfig.setProperty("service-name", "MY-SERVICE-NAME");
-//		hazelcastConfig.getNetworkConfig().getJoin().getKubernetesConfig().setProperty("service-dns", "vertx01.test-tech.svc.cluster.local");
-		hazelcastConfig.getNetworkConfig().getJoin().getKubernetesConfig().setProperty("service-dns", System.getenv("service.dns"));
+		hazelcastConfig.getNetworkConfig().getJoin().getKubernetesConfig().setProperty("namespace", System.getenv("service.namespace"));
+		hazelcastConfig.getNetworkConfig().getJoin().getKubernetesConfig().setProperty("service-name", System.getenv("service.name"));
 		
 		hazelcastConfig.setClusterName("MIT-Cluster");
 		return hazelcastConfig;
