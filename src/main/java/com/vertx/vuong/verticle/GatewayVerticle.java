@@ -28,7 +28,11 @@ public class GatewayVerticle extends AbstractVerticle {
 		
 		router.get("/api/v1/hello").handler(this::hello);
 		
-		router.get("/api/v1/:name").handler(this::helloIdentity);
+		router.get("/api/v1/hello/:name").handler(this::helloIdentity);
+		
+		router.get("/api/v1/encode").handler(this::encode);
+		
+		router.get("/api/v1/decode").handler(this::decode);
 		
 		router.route().handler(StaticHandler.create("web").setIndexPage("index.html"));
 		
@@ -53,33 +57,58 @@ public class GatewayVerticle extends AbstractVerticle {
 		LOGGER.info("HttpServer Start Success With Port: {}", port);
 	}
 	
-	public void hello(RoutingContext ctx) {
+	private void hello(RoutingContext ctx) {
 		
 		ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
 
-		LOGGER.info("Request: /api/v1/hello, Context: {}", context.unwrap());
+		LOGGER.info("Request: {}, Context: {}",ctx.request().path(),context.unwrap());
 
 		this.vertx.eventBus().request("address.hello", "", event -> {
 			ContextInternal contextSub = (ContextInternal) vertx.getOrCreateContext();
-			LOGGER.info("Response: /api/v1/hello: {}", contextSub.unwrap());
+			LOGGER.info("Response: {}", ctx.request().path()  ,contextSub.unwrap());
 			String rsp = (String) event.result().body();
 			ctx.request().response().end(rsp);
 		});
 	}
 
-	public void helloIdentity(RoutingContext ctx) {
+	private void helloIdentity(RoutingContext ctx) {
 		
 		ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
 		
-		LOGGER.info("Request: /api/v1/hello/:name, Context: {}",context.unwrap());
+		LOGGER.info("Request: {}, Context: {}",ctx.request().path(),context.unwrap());
 		
 		String name = ctx.pathParam("name");
 		
 		this.vertx.eventBus().request("address.hello.name", name, event -> {
 			ContextInternal contextSub = (ContextInternal) vertx.getOrCreateContext();
-			LOGGER.info("Response: /api/v1/hello/:name: {}", contextSub.unwrap());
+			LOGGER.info("Response: {}", ctx.request().path()  ,contextSub.unwrap());
 			ctx.request().response().end((String) event.result().body());
+		});
+	}
+	
+	private void encode(RoutingContext ctx) {
+		String name = ctx.queryParam("username").get(0);
 		
+		ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
+		LOGGER.info("Request: {}, Context: {}",ctx.request().path(),context.unwrap());
+		
+		this.vertx.eventBus().request("address.jwt.encode", name, event -> {
+			ContextInternal contextSub = (ContextInternal) vertx.getOrCreateContext();
+			LOGGER.info("Response: {}", ctx.request().path()  ,contextSub.unwrap());
+			ctx.request().response().end((String) event.result().body());
+		});
+	}
+	
+	private void decode(RoutingContext ctx) {
+		String token = ctx.queryParam("token").get(0);
+		
+		ContextInternal context = (ContextInternal) vertx.getOrCreateContext();
+		LOGGER.info("Request: {}, Context: {}",ctx.request().path(),context.unwrap());
+		
+		this.vertx.eventBus().request("address.jwt.decode", token, event -> {
+			ContextInternal contextSub = (ContextInternal) vertx.getOrCreateContext();
+			LOGGER.info("Response: {}", ctx.request().path()  ,contextSub.unwrap());
+			ctx.request().response().end((String) event.result().body());
 		});
 	}
 }

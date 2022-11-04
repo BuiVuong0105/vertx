@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import com.hazelcast.config.Config;
 import com.vertx.vuong.verticle.GatewayVerticle;
 import com.vertx.vuong.verticle.HelloVerticle;
+import com.vertx.vuong.verticle.JwtVerticle;
 
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -112,6 +113,10 @@ public class MainApplication  {
 			vertx.deployVerticle(HelloVerticle.class.getName(), new DeploymentOptions().setWorker(false).setInstances(2).setConfig(jsonObject), promise);
 		});
 		
+		Future<String> futureQrcode = Future.future(promise -> {
+			vertx.deployVerticle(JwtVerticle.class.getName(), new DeploymentOptions().setWorker(true).setInstances(1).setConfig(jsonObject), promise);
+		});
+		
 //		Future<String> futureTcpServer = Future.future(promise -> {
 //			vertx.deployVerticle(TcpServerVerticle.class.getName(), new DeploymentOptions().setWorker(false).setConfig(jsonObject), promise);
 //		});
@@ -128,7 +133,7 @@ public class MainApplication  {
 //			vertx.deployVerticle(GrpcClientVerticle.class.getName(), new DeploymentOptions().setInstances(1).setConfig(jsonObject), promise);
 //		});
 		
-		return CompositeFuture.all(futureGw, futureHello).mapEmpty();
+		return CompositeFuture.all(futureGw, futureHello, futureQrcode).mapEmpty();
 	}
 	
 }
